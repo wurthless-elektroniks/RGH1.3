@@ -1,0 +1,40 @@
+;
+; Ghidra constants for random registers
+;
+
+
+BANK0_R0 equ 000h
+BANK0_R1 equ 001h
+BANK0_R2 equ 002h
+BANK0_R3 equ 003h
+BANK0_R4 equ 004h
+BANK0_R5 equ 005h
+BANK0_R6 equ 006h
+BANK0_R7 equ 007h
+
+BANK1_R0 equ 008h
+BANK1_R1 equ 009h
+BANK1_R2 equ 00Ah
+BANK1_R3 equ 00Bh
+BANK1_R4 equ 00Ch
+BANK1_R5 equ 00Dh
+BANK1_R6 equ 00Eh
+BANK1_R7 equ 00Fh
+
+BANK2_R0 equ 010h
+BANK2_R1 equ 011h
+BANK2_R2 equ 012h
+BANK2_R3 equ 013h
+BANK2_R4 equ 014h
+BANK2_R5 equ 015h
+BANK2_R6 equ 016h
+BANK2_R7 equ 017h
+
+BANK3_R0 equ 018h
+BANK3_R1 equ 019h
+BANK3_R2 equ 01Ah
+BANK3_R3 equ 01Bh
+BANK3_R4 equ 01Ch
+BANK3_R5 equ 01Dh
+BANK3_R6 equ 01Eh
+BANK3_R7 equ 01Fh
