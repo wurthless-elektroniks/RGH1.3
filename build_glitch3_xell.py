@@ -156,6 +156,9 @@ def main():
     cbb_5772 = rgh13cbb_do_patches(cbb_5772)
     cbb_6752 = rgh13cbb_do_patches(cbb_6752)
 
+    with open("debug.bin", "wb") as f:
+        f.write(cbb_5772)
+
     cbbs = {
         '5772': cbb_5772,
         '6752': cbb_6752
