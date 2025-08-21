@@ -9,7 +9,7 @@ hwinit_postcount_code_start:
     # stubs - code in cbbpatch.py uses these instead of going to the routines directly
     b hwinit_init           # +0x00
     b hwinit_toggle_post    # +0x04
-    b hwinit_delay_case     # +0x08
+    b hwinit_delay_case     # +0x08
     b hwinit_done           # +0x0C
 
 hwinit_init:

@@ -127,7 +127,7 @@ XELL_TARGETS = {
     # test ECC for testing CB_B patches
     "test_falcon_resetme": {
         "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","smc+resetme_falcon.bin"),
+        "smc":       os.path.join("smc","smc+resetme_falcon.bin"),
         "output":    os.path.join("ecc","testonly_smc+resetme_falcon.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772'
