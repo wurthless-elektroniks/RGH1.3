@@ -109,6 +109,13 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772',
     },
+    "badfalcon" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badfalcon.bin"),
+        "output":    os.path.join("ecc","rgh13_badfalcon.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772',
+    },
     "jasper" : {
         "nandtype": NandType.NAND_16M_JASPER,
         "smc":      os.path.join("smc","build","rgh13_jasper.bin"),

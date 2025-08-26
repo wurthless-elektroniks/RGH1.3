@@ -39,6 +39,19 @@ In short, RGH1.3 does the following:
 - For the most uncooperative Jaspers, we power cycle the system if things fail very early
 - As a bonus, the Ring of Light blinks throughout the boot process so you can tell where things go right or wrong
 
+Benefits over RGH1.2:
+- Instant reboots if things go wrong
+- More aggressive approaches for stubborn systems (hi Jasper owners)
+
+Benefits over RGH3:
+- More precise glitching since we're using a glitch chip
+- No possibility of SMC hangs causing the system to power off during the boot
+
+Disadvantages:
+- Requires a trace cut (or removal of the tilt switch) and two diodes
+- RGH3 loader is known to break support for older kernels
+- See "Known improvements" below for more information
+
 ## Wiring everything up
 
 Now first up is how you wire up your glitch chip. It's the exact same pinout as RGH1.2.
@@ -73,10 +86,9 @@ timing file you want to program. You should see the thing program your Matrix. A
 programmed. You might need to program it multiple times before you're satisfied, so keep your programmer
 around.
 
-The timing file you should start with is `rgh13_pw4_d21.xsvf`. Play around with them
-until you find one that your console likes. Note that RGH1.2 v2 uses a pulse width
-of 2; I've found in testing that consoles can handle 3 or 4 but nothing more than that.
-Play around with the timing files until you're satisfied with the results.
+The timing file you should start with is `rgh13_pw2_d21.xsvf`. Play around with them until you find
+one that your console likes. Additional pulse widths are provided in case your console likes wider
+pulse widths.
 
 **If you absolutely must use the bodge capacitor:** RGH1.3 glitches so rapidly that you'll get misleading
 results with the glitch chip's blinking LED. See how it behaves with RGH1.2 first to ensure that the capacitor
@@ -90,20 +102,23 @@ Pick the ECC you want from the `ecc/` directory, and load it into J-Runner with 
 
 Once XeLL is written, power on the console and it'll drop to XeLL within a minute. Obviously, sooner is better.
 
-🤬 **For super uncooperative Jaspers:** 🤬
+🤬 **For super uncooperative consoles:** 🤬
 
-If you find your Jasper isn't reliably glitching, here's an explanation: for whatever reason those Jaspers are grumpy and
+If you find your console isn't reliably glitching, here's an explanation: for whatever reason those systems are grumpy and
 often get up on the wrong side of the bed. When that happens, they will refuse to glitch past CB_A no matter how many times
 you try, and the only way around this is to power cycle the system. Nobody knows why this happens, it's board-dependent,
-and we don't know how to solve it.
+and we don't know how to solve it. I've seen it happen on Jaspers, but it's known to happen on Falcons too.
 
-If you encounter such a console, that's what the `badjasper` ECC is for. It will hard reset your console if it thinks the
-boot has failed. This method isn't bulletproof by any stretch of the imagination, and it can take 30 seconds or more before
-the system boots, but it will typically succeed within 10-15 seconds.
+If you encounter such a console, that's what the `badjasper` and `badfalcon` ECCs are for. It will hard reset your console
+if the boot fails early. This method isn't bulletproof by any stretch of the imagination, and it can take 30 seconds or more
+before the system boots, but it will typically succeed within 10-15 seconds.
 
-To tell if your Jasper needs this workaround, you must first try to mod it with RGH1.2, using the standard 21 timing file.
-If the LED is consistently stuck on at the end of the cycle with a XeLL ECC, and the system hasn't booted after 10 or 20 tries,
-then it's one of those Jaspers.
+The easiest way to tell if your system needs this workaround is to see how it cooperates either with RGH1.2 or RGH1.3.
+If, for a given power cycle, it does not boot within 20 attempts on RGH1.2 or one minute on RGH1.3, but it works eventually
+if you power cycle the system enough times, it will need this workaround.
+
+**When using badjasper/badfalcon and your system bootloops for way too long and you want to power the system off, hold the Power
+button and it should instantly power down.**
 
 ## Ring of Light blink codes
 
@@ -118,7 +133,7 @@ Here's what the colorful twinkling lights mean:
 | Red                           | CB_A started               | Glitch pulse happens, CB_X runs   |
 | Red/Red                       | CB_X started               | CB_B loads and runs               |
 | Red/Orange                    | CB_B started               | Fusecheck/HWINIT runs             |
-| Red/Orange/Red (blinking)     | HWINIT running             | HWINIT doesn't crash              |
+| Red/Orange/Red (red blinking) | HWINIT running             | HWINIT doesn't crash              |
 | Red/Orange/Orange             | HWINIT complete            | CD loads and executes             |
 | Red/Orange/Green              | GetPowerUpCause arrived    | Kernel or XeLL loads and runs     |
 | Normal Ring of Light bootanim | Kernel/XeLL finishing boot | Things work                       |
@@ -126,6 +141,10 @@ Here's what the colorful twinkling lights mean:
 Remember that the CPU is in its most unstable state in the 100 ms following the glitch pulse.
 Most boot attempts will fail with a Red or Red/Orange blink, although most of the time a Red blink
 is all you'll see on a failed attempt.
+
+These blink codes will help with tuning the glitch chip timings too. If the CPU isn't getting past
+CB_A, the timing is way off or the pulse width is too large. You want it so that CB_B consistently
+starts and runs HWINIT.
 
 Also there's error handling in which case you'll get an Orange Ring of Death. (It's orange to distinguish it from a
 normal RRoD.) Press SYNC and EJECT as usual to display the error code.
@@ -197,6 +216,13 @@ the washing machine or are otherwise having problems, you can open an issue or, 
 Please note though that once I finish a project I usually move on to the next one, so someone else will likely end up maintaining
 this project in the future.
 
+For bug reports, please provide the following:
+- Motherboard revision (Falcon, Jasper, Tonkaset, etc.)
+- GPU type if possible (shouldn't be necessary on Jasper/Tonkaset)
+- SDRAM manufacturer
+- Southbridge revision/date code
+- etc. etc. You get the picture. More information = better.
+
 ## Known issues and improvements
 
 - It's possible to get rid of the POST diode(s), but the only way to do that is to manually initialize the SMC FIFOs at the
@@ -208,6 +234,9 @@ this project in the future.
   apply here too. The cause isn't clear, it might have to do with the use of the manufacturing CB_A (retail 9188 and 5772
   are practically the same code byte for byte). The good news is that RGH1.3 no longer needs precise timings on the SMC
   side like RGH3 does so we might be able to kill that one easily.
+
+- 15432 is working on RGH3 improvements that will need to be ported to this method once they're released and confirmed
+  working across multiple consoles.
 
 ## Credits
 

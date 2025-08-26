@@ -31,8 +31,12 @@ CBB_PRE_HWINIT_POST7_TIMEOUT equ 9
 
 ; period between which POST bit 6 must toggle during HWINIT.
 ; this can loop over and over, the main reset watchdog will reboot if HWINIT takes too long.
-; default value is 14 * 20 = 280 ms
-CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 14
+;
+; 5772 CB_B starts with about a 320 ms delay between toggles then 166 ms thereafter
+; although the first delay can be much shorter
+; 
+; default value is 14 * 20 = 400 ms (MUST match behavior in CB_C)
+CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 20
 
 ; once GetPowerUpCause arrives the CPU has this amount of time to make it to the LED bootanim
 ; or else we will reboot. this is a workaround for some systems that crash late in the boot,
@@ -187,7 +191,7 @@ _turboreset_sm_exec_state_2:
     acall _turboreset_set_leds_and_return
 
      ; for badjaspers, hard reset always
-ifdef BADJASPER
+ifdef HARD_RESET_ON_CBA_FAIL
     sjmp hard_reset
 else
     ; reboot via sysreset watchdog

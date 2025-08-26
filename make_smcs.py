@@ -85,6 +85,12 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_falcon_overlay.bin",
         "output": "rgh13_falcon.bin"
     },
+    "badfalcon_rgh13" : {
+        "clean_smc_name": "falcon_clean.bin",            
+        "asm_name": "rgh13_badfalcon.s",              
+        "overlay_name": "rgh13_badfalcon_overlay.bin",
+        "output": "rgh13_badfalcon.bin"
+    },
     "jasper_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_jasper.s",              
