@@ -4,7 +4,6 @@
 
     .include "jasperdefs.inc"
 
-
 ; timeout for normal reset watchdog
 ; default for jasper is 100 * 20 * 2 = 4000 ms
 RESET_WATCHDOG_TIMEOUT_TICKS equ 100
@@ -12,6 +11,7 @@ RESET_WATCHDOG_TIMEOUT_TICKS equ 100
 ; ------------------------------------------------------------------------------------
 
 ; these variables will be automatically zeroed out on reset
+g_holdpowerbutton_counter               equ 093h
 g_turboreset_sm_state                   equ 094h
 g_turboreset_sm_counter                 equ 095h
 g_ledlightshow_watchdog_state           equ 096h
@@ -22,7 +22,6 @@ g_ledlightshow_watchdog_death_counter   equ 097h
 g_hardreset_sm_init                     equ 098h
 g_hardreset_sm_state                    equ 099h
 g_power_up_cause_backup                 equ 09Ah
-
 
 ; ------------------------------------------------------------------------------------
 ;
@@ -47,8 +46,8 @@ g_power_up_cause_backup                 equ 09Ah
     mov dptr,#resetwatchdog_reload_counter_2_end
     mov dptr,#resetwatchdog_on_success_start
     mov dptr,#resetwatchdog_on_success_end
-    mov dptr,#resetwatchdog_boot_tries_increment_nopout_start
-    mov dptr,#resetwatchdog_boot_tries_increment_nopout_end
+    mov dptr,#resetwatchdog_on_timeout_start
+    mov dptr,#resetwatchdog_on_timeout_end
 
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
@@ -135,12 +134,11 @@ resetwatchdog_on_success_start:
     ljmp on_reset_watchdog_done
 resetwatchdog_on_success_end:
 
-    ; TODO: confirm address against clean SMC
     .org 0x12BA
-resetwatchdog_boot_tries_increment_nopout_start:
-    nop ; 2 NOPs to kill the inc instruction
-    nop
-resetwatchdog_boot_tries_increment_nopout_end:
+resetwatchdog_on_timeout_start:
+    lcall on_reset_watchdog_timeout
+    sjmp  0x12D1
+resetwatchdog_on_timeout_end:
 
 
     .org 0x1E7D
@@ -158,7 +156,6 @@ tiltsw_nullify_end:
 
     .org 0x2D73
 rgh13_common_code_start:
-    ; include common rgh1.3 code
     .include "rgh13.s"
 rgh13_common_code_end:
 

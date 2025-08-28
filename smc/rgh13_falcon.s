@@ -8,10 +8,10 @@
 ; default is 137 * 20 * 2 = 5480 ms
 RESET_WATCHDOG_TIMEOUT_TICKS equ 137
 
-
 ; ------------------------------------------------------------------------------------
 
 ; these variables will be automatically zeroed out on reset
+g_holdpowerbutton_counter               equ 092h
 g_turboreset_sm_state                   equ 093h
 g_turboreset_sm_counter                 equ 094h
 g_ledlightshow_watchdog_state           equ 095h
@@ -29,7 +29,6 @@ g_power_up_cause_backup                 equ 099h
 ;
 ; ------------------------------------------------------------------------------------
     .org 0x0000
-
     mov dptr,#mainloop_reorg_start
     mov dptr,#mainloop_reorg_end
 
@@ -47,8 +46,8 @@ g_power_up_cause_backup                 equ 099h
     mov dptr,#resetwatchdog_reload_counter_2_end
     mov dptr,#resetwatchdog_on_success_start
     mov dptr,#resetwatchdog_on_success_end
-    mov dptr,#resetwatchdog_boot_tries_increment_nopout_start
-    mov dptr,#resetwatchdog_boot_tries_increment_nopout_end
+    mov dptr,#resetwatchdog_on_timeout_start
+    mov dptr,#resetwatchdog_on_timeout_end
 
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
@@ -134,10 +133,10 @@ resetwatchdog_on_success_start:
 resetwatchdog_on_success_end:
 
     .org 0x12A3
-resetwatchdog_boot_tries_increment_nopout_start:
-    nop ; 2 NOPs to kill the inc instruction
-    nop
-resetwatchdog_boot_tries_increment_nopout_end:
+resetwatchdog_on_timeout_start:
+    lcall on_reset_watchdog_timeout
+    sjmp  0x12BA
+resetwatchdog_on_timeout_end:
 
     .org 0x1E62
 powerup_reroute_start:
@@ -157,7 +156,6 @@ tiltsw_nullify_end:
     .org 0x2D10
 
 rgh13_common_code_start:
-    ; include common rgh1.3 code
     .include "rgh13.s"
 rgh13_common_code_end:
 

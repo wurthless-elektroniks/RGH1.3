@@ -44,6 +44,14 @@ CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 20
 ; default value is 125 * 20 * 2 = 5000 ms, adjust as necessary
 LED_LIGHTSHOW_SM_TIMEOUT_TICKS equ 125
 
+; LED blink patterns
+;
+; assuming the system is lying flat:
+; bit 0/4 - top left
+; bit 1/5 - top right
+; bit 2/6 - bottom left
+; bit 3/7 - bottom right
+
 ;                                  ggggrrrr
 ;                                  32103210
 LEDPATTERN_RED               equ 0b00000001
@@ -77,7 +85,7 @@ rgh13_statemachines_exec:
     acall turboreset_sm_exec       ; manages POST watchdogs
     acall hardreset_sm_exec        ; manages hard reset stuff, if necessary
     acall led_lightshow_sm_exec    ; manages ring of light bootanim watchdog
-    ret
+    ljmp holdpowerbutton_sm_exec   ; hold powerbutton for 5 seconds to power off
 
 ; ------------------------------------------------------------------------------------
 ;
@@ -85,6 +93,11 @@ rgh13_statemachines_exec:
 ; Monitor POST bits 6/7 during the boot and reboot if we don't like what we see
 ;
 ; ------------------------------------------------------------------------------------
+
+on_reset_watchdog_timeout:
+    ; turn off statemachines that might be running
+    acall _led_lightshow_sm_go_idle
+    sjmp  _turboreset_sm_disarm
 
 ; hook from SMC code lands here
 ;
@@ -102,7 +115,7 @@ on_reset_watchdog_deassert_cpu_reset:
     mov r0,#g_turboreset_sm_counter ; with bootrom timeout
     mov @r0,#BOOTROM_TIMEOUT
 
-    ; and clear LEDs state in case it was stuck on from previous attempt
+    ; clear LEDs, they'll have been left on from previous (failed) attempts
     mov a,#0
     ljmp rol_set_leds
 
@@ -152,6 +165,7 @@ _setup_rrod:
     mov r0,#g_rol_af_cell
     mov @r0,g_rrod_base_error_pattern
 
+    setb g_force_rrod_3        ; forces immediate power down
     setb g_force_rrod_ipc
     setb g_rol_update_pending
 
@@ -186,16 +200,11 @@ _turboreset_sm_exec_state_2:
     ; we've timed out - call common disarm code below instead of repeating it
     acall _turboreset_sm_disarm
 
-    ; clear LEDs state
-    mov a,#0
-    acall _turboreset_set_leds_and_return
-
      ; for badjaspers, hard reset always
 ifdef HARD_RESET_ON_CBA_FAIL
     sjmp hard_reset
 else
-    ; reboot via sysreset watchdog
-    ljmp msftsmc_sysreset_watchdog_exec_state_10
+    sjmp _turboreset_reboot_via_sysreset_watchdog
 endif
 
 _turboreset_sm_go_state_3:
@@ -221,13 +230,9 @@ _turboreset_sm_common_timeout_code:
     cjne @r0,#0,_turboreset_do_nothing
     
     ; we've timed out - call common disarm code below instead of repeating it
-    lcall _turboreset_sm_disarm
+    acall _turboreset_sm_disarm
 
-    ; clear LEDs state
-    mov a,#0
-    acall _turboreset_set_leds_and_return
-
-    ; reboot via sysreset watchdog
+_turboreset_reboot_via_sysreset_watchdog:
     ljmp msftsmc_sysreset_watchdog_exec_state_10
 
 _turboreset_sm_go_state_4:
@@ -393,7 +398,7 @@ on_reset_watchdog_done:
 
     ; set RoL pattern red, orange, green
     mov a,#LEDPATTERN_RED_ORANGE_GREEN
-    lcall rol_set_leds
+    acall _turboreset_set_leds_and_return
 
     ; start LED lightshow watchdog
     mov r0,#g_ledlightshow_watchdog_state
@@ -451,6 +456,7 @@ ipc_led_anim_has_arrived:
     ; (carry should still be set coming into this function)
     jnc led_lightshow_sm_do_nothing
 
+    ; it has, so clear our LED state and let the ring of light run normally
     mov a,#0
     acall rol_set_leds
 
@@ -496,3 +502,29 @@ _clear_led_priority_bit:
     mov a,g_rol_flags
     anl a,#0b11011111 
     sjmp _rol_set_leds_finish
+
+; ------------------------------------------------------------------------------------
+;
+; Quality of life improvement: force power down if power button held 5 seconds
+; (saves people the effort of unplugging their system if it freezes)
+;
+; ------------------------------------------------------------------------------------
+
+holdpowerbutton_sm_exec:
+    jnb gpio_psu_12v_enable,_holdpowerbutton_idle ; power must be on (active high)
+    jnb gpio_powersw_n,_holdpowerbutton_held      ; and powerbutton must be held (active low)
+_holdpowerbutton_idle:
+    ; 250 * 20 = 5000 ms
+    mov r0,#g_holdpowerbutton_counter
+    mov @r0,#250
+_holdpowerbutton_done:
+    ret
+
+_holdpowerbutton_held:
+    ; decrement counter
+    mov r0,#g_holdpowerbutton_counter
+    dec @r0
+    cjne @r0,#0,_holdpowerbutton_done
+
+    ; when it hits 0, force hard reset to standby mode
+    ljmp 0x0000
