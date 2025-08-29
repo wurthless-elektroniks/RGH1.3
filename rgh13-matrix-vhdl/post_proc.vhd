@@ -15,7 +15,6 @@ entity post_proc is
 		to_slow : out STD_LOGIC := '0';
 		DBG : out STD_LOGIC := '0';
 		RST : inout STD_LOGIC := 'Z'
-		timeout_out : out STD_LOGIC := '0';
 	);
 end post_proc;
 
@@ -90,9 +89,6 @@ begin
 	else
 		to_slow <= '0';
 	end if;
-
-	-- to watchdog
-	timeout_out <= timeout;
 end process;
 
 end arch;
