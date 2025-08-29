@@ -23,6 +23,12 @@ g_hardreset_sm_init                     equ 097h
 g_hardreset_sm_state                    equ 098h
 g_power_up_cause_backup                 equ 099h
 
+; 5772 CB_B starts with about a 320 ms delay between toggles then 166 ms thereafter
+; although the first delay can be much shorter
+; 
+; default value is 14 * 20 = 400 ms (MUST match behavior in CB_B)
+CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 20
+
 ; ------------------------------------------------------------------------------------
 ;
 ; Patchlist

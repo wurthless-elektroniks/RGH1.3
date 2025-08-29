@@ -29,14 +29,10 @@ CBX_POST6_TIMEOUT equ 4
 ; default value is  9 * 20 = 180 ms
 CBB_PRE_HWINIT_POST7_TIMEOUT equ 9
 
-; period between which POST bit 6 must toggle during HWINIT.
+; CBB_HWINIT_POST6_TOGGLE_TIMEOUT in rgh13_falcon.s and rgh13_jasper.s
+; specifies the period between which POST bit 6 must toggle during HWINIT.
 ; this can loop over and over, the main reset watchdog will reboot if HWINIT takes too long.
-;
-; 5772 CB_B starts with about a 320 ms delay between toggles then 166 ms thereafter
-; although the first delay can be much shorter
-; 
-; default value is 14 * 20 = 400 ms (MUST match behavior in CB_C)
-CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 20
+; note the behavior is console-dependent.
 
 ; once GetPowerUpCause arrives the CPU has this amount of time to make it to the LED bootanim
 ; or else we will reboot. this is a workaround for some systems that crash late in the boot,

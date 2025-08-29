@@ -23,6 +23,12 @@ g_hardreset_sm_init                     equ 098h
 g_hardreset_sm_state                    equ 099h
 g_power_up_cause_backup                 equ 09Ah
 
+
+; 6752 on my test Jasper toggles A2/E2 only once, but the delay is somewhere around 660 ms.
+; 
+; default value is 35 * 20 = 700 ms
+CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 35
+
 ; ------------------------------------------------------------------------------------
 ;
 ; Patchlist

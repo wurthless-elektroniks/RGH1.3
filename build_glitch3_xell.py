@@ -101,7 +101,7 @@ def load_or_die(path: str) -> bytes:
         return f.read()
 
 XELL_TARGETS = {
-    # falcon, jasper, badjasper are "production" ECCs
+    # falcon, badfalcon, jasper, badjasper are "production" ECCs
     "falcon" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_falcon.bin"),
@@ -123,7 +123,7 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":      '6752',
     },
-    "jasper_badjasper": {
+    "badjasper": {
         "nandtype":  NandType.NAND_16M_JASPER,
         "smc":       os.path.join("smc","build","rgh13_badjasper.bin"),
         "output":    os.path.join("ecc","rgh13_badjasper.ecc"),
@@ -138,6 +138,13 @@ XELL_TARGETS = {
         "output":    os.path.join("ecc","testonly_smc+resetme_falcon.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772'
+    },
+    "test_jasper_resetme": {
+        "nandtype":  NandType.NAND_16M_JASPER,
+        "smc":       os.path.join("smc","smc+resetme_jasper.bin"),
+        "output":    os.path.join("ecc","testonly_smc+resetme_jasper.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '6752'
     }
 }
 
