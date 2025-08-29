@@ -2,6 +2,8 @@
 ; RGH1.3 code for Jasper
 ;
 
+    JASPER equ 1
+
     .include "jasperdefs.inc"
 
 ; timeout for normal reset watchdog

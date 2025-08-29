@@ -258,7 +258,13 @@ _turboreset_sm_go_state_5:
     mov r0,#g_turboreset_sm_counter
     mov @r0,#CBB_HWINIT_POST6_TOGGLE_TIMEOUT
 
+    ; A2/E2 toggles only once on Jasper so display red/orange/red there
+ifdef JASPER
+    mov a,#LEDPATTERN_RED_ORANGE_RED
+else
     mov a,#LEDPATTERN_RED_ORANGE
+endif
+
 _turboreset_set_leds_and_return:
     ljmp rol_set_leds
 

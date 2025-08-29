@@ -133,7 +133,7 @@ Here's what the colorful twinkling lights mean:
 | Red                           | CB_A started               | Glitch pulse happens, CB_X runs   |
 | Red/Red                       | CB_X started               | CB_B loads and runs               |
 | Red/Orange                    | CB_B started               | Fusecheck/HWINIT runs             |
-| Red/Orange/Red (red blinking) | HWINIT running             | HWINIT doesn't crash              |
+| Red/Orange/Red                | HWINIT running             | HWINIT doesn't crash              |
 | Red/Orange/Orange             | HWINIT complete            | CD loads and executes             |
 | Red/Orange/Green              | GetPowerUpCause arrived    | Kernel or XeLL loads and runs     |
 | Normal Ring of Light bootanim | Kernel/XeLL finishing boot | Things work                       |
