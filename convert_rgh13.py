@@ -3,15 +3,18 @@ import struct
 import hashlib
 from argparse import ArgumentParser,RawTextHelpFormatter
 from enum import Enum
+from smc import encrypt_smc
+from cbbpatch import rgh13cbb_do_patches
 import ecc
+import os
 
 # somehow, the Jasper images use the exact same SMC, I don't know why
 SHA1_FALCON_RGH3_27MHZ = "9b89a53dbdb4735782e92b70bb5e956f6b35da5f"
 SHA1_FALCON_RGH3_10MHZ = "a4ae6a6f1ff374739d1c91f8a2881f4eecc210d3"
 
 
-SHA1_CBB_5772_XEBUILD = ""
-SHA1_CBB_6752_XEBUILD = ""
+SHA1_CBB_5772_XEBUILD = "3a8fb9580ce01cf1c0e2d885e0fd96a05571643f"
+SHA1_CBB_6752_XEBUILD = "899cd01e00ef7b27ceb010dde42e4d6e9c871330"
 
 def _init_argparser():
     argparser = ArgumentParser(formatter_class=RawTextHelpFormatter,
@@ -28,6 +31,13 @@ def _init_argparser():
                            help="Path to updflash.bin (WARNING: FILE WILL BE OVERWRITTEN)")
   
     return argparser
+
+SMC_FILEPATH_MAP = {
+    'falcon': os.path.join("smc", "build", "rgh13_falcon.bin"),
+    'badfalcon': os.path.join("smc", "build", "rgh13_badfalcon.bin"),
+    'jasper': os.path.join("smc", "build", "rgh13_jasper.bin"),
+    'badjasper': os.path.join("smc", "build", "rgh13_badjasper.bin")
+}
 
 def main():
     argparser = _init_argparser()
@@ -60,6 +70,11 @@ def main():
     # only inspect/modify the first chunk (1 block on big blocks)
     nand_stripped = ecc.ecc_strip(nand[0:0x021000])
 
+    # the SMC data MUST be from 0x1000~0x4000, there's no microsoft SMC that isn't like that
+    if nand_stripped[0x78:0x80] != bytes([0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x10, 0x00]):
+        print("error: SMC isn't located at 0x1000~0x4000 like it should be. something's wrong with your NAND.")
+        return
+
     # get shasum of encrypted SMC - that will be enough to determine what it is
     smc_hash = hashlib.sha1(nand_stripped[0x1000:0x4000])
     if smc_hash.hexdigest() == SHA1_FALCON_RGH3_27MHZ:
@@ -87,27 +102,65 @@ def main():
     if nand_stripped[next_cb_addr:next_cb_addr+2] != bytes([0x43, 0x42]):
         print("error: CB magicword not found at next CB slot")
         return
-    
+
     cbb_version = struct.unpack(">H",nand_stripped[next_cb_addr+2:next_cb_addr+4])[0]
     cbb_size = struct.unpack(">I", nand_stripped[next_cb_addr+0x0C:next_cb_addr+0x10])[0]
 
+    cbb = nand_stripped[next_cb_addr:next_cb_addr+cbb_size]
+
     # calc SHA hash of CB_B to determine what it really is
     # (hash runs from 0x140 through to end of CB_B)
-    cbb_hash = hashlib.sha1(nand_stripped[next_cb_addr + 0x140:next_cb_addr + cbb_size])
+    cbb_hash = hashlib.sha1(cbb[0x140:]).hexdigest()
 
+    #with open("cbb_debug.bin", "wb") as f:
+    #    f.write(cbb)
+
+    smctype = ""
     if cbb_version == 5772 and cbb_hash == SHA1_CBB_5772_XEBUILD:
         print("found xeBuild-patched Falcon CB_B")
+        smctype = "falcon"
     elif cbb_version == 6752 and cbb_hash == SHA1_CBB_6752_XEBUILD:
         print("found xeBuild-patched Jasper CB_B")
+        smctype = "jasper"
     else:
-        print("error: unrecognized/unsupported CB_B version")
+        print(f"error: unrecognized/unsupported CB_B version (hash was: {cbb_hash})")
+        return
+
+    if args.badjasper is True:
+        print("badjasper mode enabled!")
+        smctype = "bad"+smctype
+
+    smcpath = SMC_FILEPATH_MAP[smctype]
+    print(f"attempting to read SMC from: {smcpath}")
+
+    smcdata = None
+    with open(smcpath,"rb") as f:
+        smcdata = f.read()
+
+    if len(smcdata) != 0x3000:
+        print("error: SMC somehow was not 0x3000 bytes. stopping.")
         return
 
     # inject appropriate SMC image
+    smcdata_encrypted = encrypt_smc(smcdata)
+    nand_stripped[0x1000:0x4000] = smcdata_encrypted
+    print("injected new SMC program")
 
     # inject appropriate hacked CB_B
+    cbb_patched = rgh13cbb_do_patches(cbb)
+    nand_stripped[next_cb_addr:next_cb_addr+cbb_size] = cbb_patched
+    print("patched CB_B")
+    
+    print("recalculating ECC data...")
+    nand_stripped_ecc = ecc.ecc_encode(nand_stripped, nand_type, 0)
+    nand = bytearray(nand)
+    nand[0:0x021000] = nand_stripped_ecc
 
-    # write updated NAND
+    print("writing final NAND...")
+    with open(args.updflash, "wb") as f:
+        f.write(nand)
+
+    print("converted to RGH1.3 successfully, happy flashing")
 
 if __name__ == '__main__':
     main()
