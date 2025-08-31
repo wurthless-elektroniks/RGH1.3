@@ -72,9 +72,9 @@ You will also need two diodes (1N400x slow power diodes will work, speed's not c
 Here's a professionally made diagram showing where you should solder things. Route wires at your own discretion.
 It's better to keep your wires short and to avoid the high speed busses and power rail inductors whenever possible.
 
-![](solderpoints_top.png)
+![](rgh13_points_top.png)
 
-![](solderpoints_bottom.png)
+![](rgh13_points_bottom.png)
 
 Connect your Matrix or whatever to your programmer, **MAKING SURE YOU AREN'T CONNECTING IT IN REVERSE
 POLARITY BECAUSE YOU WILL FRY THE GLITCH CHIP IF YOU DO.** Most Matrix chips don't come with a pin
