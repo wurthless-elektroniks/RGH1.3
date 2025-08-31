@@ -113,12 +113,14 @@ If you encounter such a console, that's what the `badjasper` and `badfalcon` ECC
 if the boot fails early. This method isn't bulletproof by any stretch of the imagination, and it can take 30 seconds or more
 before the system boots, but it will typically succeed within 10-15 seconds.
 
-The easiest way to tell if your system needs this workaround is to see how it cooperates either with RGH1.2 or RGH1.3.
-If, for a given power cycle, it does not boot within 20 attempts on RGH1.2 or one minute on RGH1.3, but it works eventually
-if you power cycle the system enough times, it will need this workaround.
+There are two ways to tell if your system needs this workaround. On one given power cycle, if you get this behavior,
+but on another power cycle the system boots, then you'll need to use `badjasper`.
+- The system never successfully glitches for one given power cycle (20+ attempts for both RGH1.2 and RGH3)
+- On RGH1.3, a single red light blinks on the Ring of Light (see blink codes below)
 
 **When using badjasper/badfalcon and your system bootloops for way too long and you want to power the system off, hold the Power
-button and it should instantly power down.**
+button and it should instantly power down.** As a quality of life improvement, you can also hold the power button down for five seconds
+on both `badjasper` and normal ECCs and the system will immediately power off.
 
 ## Ring of Light blink codes
 
@@ -139,19 +141,15 @@ Here's what the colorful twinkling lights mean:
 | Normal Ring of Light bootanim | Kernel/XeLL finishing boot | Things work                       |
 
 Remember that the CPU is in its most unstable state in the 100 ms following the glitch pulse.
-Most boot attempts will fail with a Red or Red/Orange blink, although most of the time a Red blink
-is all you'll see on a failed attempt.
+Most boot attempts will fail with a Red or Red/Red blink.
 
 These blink codes will help with tuning the glitch chip timings too. If the CPU isn't getting past
 CB_A, the timing is way off or the pulse width is too large. You want it so that CB_B consistently
 starts and runs HWINIT.
 
-Also there's error handling in which case you'll get an Orange Ring of Death. (It's orange to distinguish it from a
-normal RRoD.) Press SYNC and EJECT as usual to display the error code.
-
-Error codes are:
-- 2222: CPU did not make it to CB_A in time. CPU might be dying or you wired something wrong.
-- 3333: POST bits 6 and 7 were not low coming out of CPU reset. Diodes are missing or wired incorrectly.
+Also there's error handling. If something goes wrong, the Ring of Light will rapidly blink red LEDs. The error codes are:
+- 2 LEDs: CPU did not make it to CB_A in time. CPU might be dying or you wired something wrong.
+- 3 LEDs: POST bits 6 and 7 were not low coming out of CPU reset. Diodes are missing or wired incorrectly.
   Also check that you've disabled the tilt switch.
 
 ## Creating your updflash.bin

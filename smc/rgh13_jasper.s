@@ -43,6 +43,12 @@ CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 35
     mov dptr,#init_memclear_patch_start
     mov dptr,#init_memclear_patch_end
 
+    mov dptr,#ipc_setled_reroute_start
+    mov dptr,#ipc_setled_reroute_end
+
+    mov dptr,#on_reset_done_reroute_start
+    mov dptr,#on_reset_done_reroute_end
+
     mov dptr,#skip_reading_gpu_reset_done_1_start
     mov dptr,#skip_reading_gpu_reset_done_1_end
     mov dptr,#skip_reading_gpu_reset_done_2_start
@@ -111,6 +117,11 @@ ipc_displayerror_reroute_start:
     nop
 ipc_displayerror_reroute_end:
 
+    .org 0x11DB
+on_reset_done_reroute_start:
+    lcall cpu_reset_handler
+on_reset_done_reroute_end:
+
     ; GPU_RESET_DONE reads in reset watchdog must be patched out to avoid RRoD
     ; RGH3 does this too
     .org 0x11E0
@@ -145,7 +156,7 @@ resetwatchdog_on_success_end:
     .org 0x12BA
 resetwatchdog_on_timeout_start:
     lcall on_reset_watchdog_timeout
-    sjmp  0x12D1
+    ljmp  0x12D1
 resetwatchdog_on_timeout_end:
 
 
@@ -164,7 +175,13 @@ tiltsw_nullify_end:
 
     .org 0x2D73
 rgh13_common_code_start:
+
+cpu_reset_handler:
+    lcall on_reset_watchdog_deassert_cpu_reset
+    ljmp msftsmc_deassert_cpu_reset
+
     .include "rgh13.s"
+
 rgh13_common_code_end:
 
     .end

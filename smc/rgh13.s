@@ -26,8 +26,8 @@ CBX_POST6_TIMEOUT equ 4
 
 ; amount of time CB_B has to make it to HWINIT.
 ; remember: CB_B is hacked to assert POST bit 7 while HWINIT is running.
-; default value is  9 * 20 = 180 ms
-CBB_PRE_HWINIT_POST7_TIMEOUT equ 9
+; default value is  12 * 20 = 240 ms
+CBB_PRE_HWINIT_POST7_TIMEOUT equ 12
 
 ; CBB_HWINIT_POST6_TOGGLE_TIMEOUT in rgh13_falcon.s and rgh13_jasper.s
 ; specifies the period between which POST bit 6 must toggle during HWINIT.

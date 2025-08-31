@@ -170,7 +170,7 @@ rgh13_common_code_start:
 
 cpu_reset_handler:
     lcall on_reset_watchdog_deassert_cpu_reset
-    ljmp 0x006C ; actually deassert CPU reset
+    ljmp msftsmc_deassert_cpu_reset
 
 rgh13_common_code_end:
 
