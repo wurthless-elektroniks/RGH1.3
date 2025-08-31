@@ -24,10 +24,11 @@ g_hardreset_sm_state                    equ 098h
 g_power_up_cause_backup                 equ 099h
 
 ; 5772 CB_B starts with about a 320 ms delay between toggles then 166 ms thereafter
-; although the first delay can be much shorter
+; although the first delay can be much shorter.
+; other Falcons might take longer...
 ; 
 ; default value is 14 * 20 = 400 ms (MUST match behavior in CB_B)
-CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 20
+CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 35
 
 ; ------------------------------------------------------------------------------------
 ;
@@ -41,13 +42,16 @@ CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 20
     mov dptr,#init_memclear_patch_start
     mov dptr,#init_memclear_patch_end
     
+    mov dptr,#ipc_setled_reroute_start
+    mov dptr,#ipc_setled_reroute_end
+
     mov dptr,#skip_reading_gpu_reset_done_1_start
     mov dptr,#skip_reading_gpu_reset_done_1_end
     mov dptr,#skip_reading_gpu_reset_done_2_start
     mov dptr,#skip_reading_gpu_reset_done_2_end
 
-    mov dptr,#resetwatchdog_reload_counter_1_start
-    mov dptr,#resetwatchdog_reload_counter_1_end
+    mov dptr,#resetwatchdog_release_cpu_reset_start
+    mov dptr,#resetwatchdog_release_cpu_reset_end
     mov dptr,#resetwatchdog_reload_counter_2_start
     mov dptr,#resetwatchdog_reload_counter_2_end
     mov dptr,#resetwatchdog_on_success_start
@@ -120,10 +124,11 @@ skip_reading_gpu_reset_done_2_start:
 skip_reading_gpu_reset_done_2_end:
 
 
-    .org 0x1274
-resetwatchdog_reload_counter_1_start:
-    mov 0x3D,#RESET_WATCHDOG_TIMEOUT_TICKS
-resetwatchdog_reload_counter_1_end:
+    .org 0x1271
+resetwatchdog_release_cpu_reset_start:
+    lcall cpu_reset_handler                ; 0x1271, 3 bytes
+    mov 0x3D,#RESET_WATCHDOG_TIMEOUT_TICKS ; 0x1274, 3 bytes
+resetwatchdog_release_cpu_reset_end:
 
     .org 0x1282
 resetwatchdog_reload_counter_2_start:
@@ -141,7 +146,7 @@ resetwatchdog_on_success_end:
     .org 0x12A3
 resetwatchdog_on_timeout_start:
     lcall on_reset_watchdog_timeout
-    sjmp  0x12BA
+    ljmp  0x12BA
 resetwatchdog_on_timeout_end:
 
     .org 0x1E62
@@ -160,9 +165,13 @@ tiltsw_nullify_end:
 
 
     .org 0x2D10
-
 rgh13_common_code_start:
     .include "rgh13.s"
+
+cpu_reset_handler:
+    lcall on_reset_watchdog_deassert_cpu_reset
+    ljmp 0x006C ; actually deassert CPU reset
+
 rgh13_common_code_end:
 
     .end

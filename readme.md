@@ -235,6 +235,9 @@ For bug reports, please provide the following:
   are practically the same code byte for byte). The good news is that RGH1.3 no longer needs precise timings on the SMC
   side like RGH3 does so we might be able to kill that one easily.
 
+- It's possible to speed up resets on failed attempts simply by resetting the CPU. However, the CPU can go into
+  a coma on failed attempts, which will cause it to lock up and ignore any attempts to reset it.
+
 - 15432 is working on RGH3 improvements that will need to be ported to this method once they're released and confirmed
   working across multiple consoles.
 

@@ -196,7 +196,7 @@ _turboreset_sm_exec_state_2:
     ; we've timed out - call common disarm code below instead of repeating it
     acall _turboreset_sm_disarm
 
-     ; for badjaspers, hard reset always
+    ; for badjaspers, hard reset always
 ifdef HARD_RESET_ON_CBA_FAIL
     sjmp hard_reset
 else
