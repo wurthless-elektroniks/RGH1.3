@@ -98,7 +98,7 @@ init_memclear_patch_start:
 init_memclear_patch_end:
 
     ; reroute any power LED changes (via IPC) to custom code below
-    .org 0xC91
+    .org 0xC72
 ipc_setled_reroute_start:
     ljmp ipc_led_anim_has_arrived
 ipc_setled_reroute_end:
@@ -143,7 +143,7 @@ resetwatchdog_on_success_start:
     ljmp on_reset_watchdog_done
 resetwatchdog_on_success_end:
 
-    .org 0x12A3
+    .org msftsmc_sysreset_watchdog_exec_state_10
 resetwatchdog_on_timeout_start:
     lcall on_reset_watchdog_timeout
     ljmp  0x12BA

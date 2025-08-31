@@ -91,6 +91,10 @@ rgh13_statemachines_exec:
 ; ------------------------------------------------------------------------------------
 
 on_reset_watchdog_timeout:
+    ; assert /CPU_RST_N now so POST bits drop to 0
+    ; if we don't do this then our POST bit check will fail and we'll get a RRoD
+    clr gpio_cpu_rst_n
+
     ; turn off statemachines that might be running
     acall _led_lightshow_sm_go_idle
     sjmp  _turboreset_sm_disarm
@@ -102,7 +106,7 @@ on_reset_watchdog_timeout:
 ; jasper does a bit of extra stuff before the counter gets loaded.
 on_reset_watchdog_deassert_cpu_reset:
     ; these POST bits MUST be zero or there's a wiring issue.
-    ; in which case, refuse to let the system run
+    ; in which case, refuse to let the system run.
     jb gpio_gpu_reset_done,_post_bits_not_zero_at_reset
     jb gpio_tiltsw_n,_post_bits_not_zero_at_reset
 
