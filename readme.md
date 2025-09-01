@@ -1,3 +1,7 @@
+# Yes I know there's a softmod coming
+
+This was developed mostly before the softmod was announced. I'm releasing it anyway because the code here might be of use to someone.
+
 # RGH1.3: Fast Boots For Fat 360s
 
 RGH1.3 combines a glitch chip, the RGH3 loader chain, a completely unorthodox patched CB_B and a hacked SMC image to rapidly glitch the CPU.
