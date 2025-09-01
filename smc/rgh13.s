@@ -12,8 +12,8 @@
 
 ; amount of time the bootrom has to load and run CB_A.
 ; if it doesn't in time, we raise RRoD 0022 because this is a major hardware fault.
-; default is 25 * 20 = 500 ms
-BOOTROM_TIMEOUT   equ 25
+; default is 50 * 20 = 1000 ms
+BOOTROM_TIMEOUT   equ 50
 
 ; amount of time CB_A has to finish execution and de-assert POST bit 7.
 ; default value is 16 * 20 = 320 ms
@@ -157,8 +157,8 @@ turboreset_sm_exec:
     cjne @r0,#0,_turboreset_do_nothing
 
     ; on timeout, raise RRoD 2222 and give up
-    mov g_rrod_errorcode_1,#0xAA
-    mov g_rrod_errorcode_2,#0xAA
+    mov g_rrod_errorcode_1,#0x00
+    mov g_rrod_errorcode_2,#0x00
 _setup_rrod:
     mov g_rrod_set_zero,#0
     mov g_rrod_base_error_pattern,#LED_ERROR_PATTERN
@@ -166,10 +166,12 @@ _setup_rrod:
     mov @r0,g_rrod_base_error_pattern
 
     setb g_force_rrod_3        ; forces immediate power down
+    setb g_force_rrod_4
     setb g_force_rrod_ipc
     setb g_rol_update_pending
+    clr  g_sysreset_watchdog_should_run
 
-    mov r0,#g_turboreset_sm_counter
+    mov r0,#g_turboreset_sm_state
     mov @r0,#0
 _turboreset_do_nothing:
     ret

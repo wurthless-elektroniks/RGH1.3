@@ -148,9 +148,10 @@ CB_A, the timing is way off or the pulse width is too large. You want it so that
 starts and runs HWINIT.
 
 Also there's error handling. If something goes wrong, the Ring of Light will rapidly blink red LEDs. The error codes are:
-- 2 LEDs: CPU did not make it to CB_A in time. CPU might be dying or you wired something wrong.
 - 3 LEDs: POST bits 6 and 7 were not low coming out of CPU reset. Diodes are missing or wired incorrectly.
-  Also check that you've disabled the tilt switch.
+  Also check that you've disabled the tilt switch. **If you are using the capacitor and you get this error
+  code, there is too much noise on the PLL wire.**
+- 4 LEDs: CPU did not make it to CB_A in time. CPU might be dying or you wired something wrong.
 
 ## Creating your updflash.bin
 
@@ -238,6 +239,8 @@ For bug reports, please provide the following:
 
 - 15432 is working on RGH3 improvements that will need to be ported to this method once they're released and confirmed
   working across multiple consoles.
+
+- I am still too lazy to fix the ECC calculations for big block Jaspers.
 
 ## Credits
 
