@@ -94,9 +94,14 @@ The timing file you should start with is `rgh13_pw2_d21.xsvf`. Play around with 
 one that your console likes. Additional pulse widths are provided in case your console likes wider
 pulse widths.
 
-**If you absolutely must use the bodge capacitor:** RGH1.3 glitches so rapidly that you'll get misleading
-results with the glitch chip's blinking LED. See how it behaves with RGH1.2 first to ensure that the capacitor
-isn't causing problems.
+**For people wanting to use the bodge capacitor:** RGH1.3 glitches so rapidly that you'll get misleading
+results with the glitch chip's blinking LED. The SMC code can catch major CPU issues (see error handling
+info below) but it won't be able to diagnose how much noise is on the PLL line.
+
+Tips for capacitor users:
+- 68 nF (0.068 uF) and 100 nf (0.1 uF) are the common capacitor values
+- Matrix users MUST ensure the glitch chip AND the capacitor are properly grounded or there will be too much noise
+- You can see how the glitch chip LED behaves under RGH1.2 to better diagnose PLL noise
 
 ## Flashing XeLL
 
