@@ -146,17 +146,29 @@ turboreset_sm_exec:
     mov a,@r0
 
 ;
-; state 1 - wait for POST bit 6 to rise, and throw RRoD if it doesn't in time
+; state 1 - wait for POST bits 6 and 7 to rise, and throw RRoD if they don't do so in time
 ;
     cjne a,#1,_turboreset_sm_exec_state_2
-    jb gpio_gpu_reset_done,_turboreset_go_state_2
+    jnb gpio_gpu_reset_done,_turboreset_sm_state_1_timeout
+    jnb gpio_tiltsw_n,_turboreset_sm_state_1_timeout
 
+_turboreset_go_state_2:
+    mov r0,#g_turboreset_sm_state
+    mov @r0,#2
+    mov r0,#g_turboreset_sm_counter
+    mov @r0,#CBA_POST7_TIMEOUT
+
+    ; flash red on ring of light
+    mov a,#LEDPATTERN_RED
+    sjmp _turboreset_set_leds_and_return
+
+_turboreset_sm_state_1_timeout:
     ; tick timer down
     mov r0,#g_turboreset_sm_counter
     dec @r0
     cjne @r0,#0,_turboreset_do_nothing
 
-    ; on timeout, raise RRoD 2222 and give up
+    ; on timeout, raise RRoD 0000 (displays as 4444) and give up
     mov g_rrod_errorcode_1,#0x00
     mov g_rrod_errorcode_2,#0x00
 _setup_rrod:
@@ -175,16 +187,6 @@ _setup_rrod:
     mov @r0,#0
 _turboreset_do_nothing:
     ret
-
-_turboreset_go_state_2:
-    mov r0,#g_turboreset_sm_state
-    mov @r0,#2
-    mov r0,#g_turboreset_sm_counter
-    mov @r0,#CBA_POST7_TIMEOUT
-
-    ; flash red on ring of light
-    mov a,#LEDPATTERN_RED
-    sjmp _turboreset_set_leds_and_return
 
 ;
 ; state 2 - POST bit 7 (connected to TILTSW) must fall in time

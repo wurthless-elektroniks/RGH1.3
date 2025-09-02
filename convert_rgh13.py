@@ -58,8 +58,7 @@ def main():
     
     # FIXME: there is a bug somewhere that breaks big block NANDs, have to find it...
     if nand_type == ecc.NandType.NAND_64M:
-        print("sorry, big block NANDs are not supported yet")
-        return
+        print("found Jasper big boy NAND")
 
     if nand_type == ecc.NandType.NAND_16M_JASPER:
         print("found Jasper-style 16m NAND")
