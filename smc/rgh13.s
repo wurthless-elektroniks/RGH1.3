@@ -3,6 +3,9 @@
 ; Also includes badjasper stuff
 ;
 
+ifndef JASPER
+    JASPER equ 0
+endif
 
 ; ------------------------------------------------------------------------------------
 ;
@@ -267,7 +270,7 @@ _turboreset_sm_go_state_5:
     mov @r0,#CBB_HWINIT_POST6_TOGGLE_TIMEOUT
 
     ; A2/E2 toggles only once on Jasper so display red/orange/red there
-ifdef JASPER
+if JASPER == 1
     mov a,#LEDPATTERN_RED_ORANGE_RED
 else
     mov a,#LEDPATTERN_RED_ORANGE

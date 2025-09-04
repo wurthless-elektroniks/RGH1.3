@@ -32,9 +32,12 @@ def _init_argparser():
   
     return argparser
 
+# FIXME: there is a bug in the Falcon SMC code that results in the board playing blind
+# For now, use Jasper-on-Falcon SMCs for Falcon targets
+# See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
 SMC_FILEPATH_MAP = {
-    'falcon': os.path.join("smc", "build", "rgh13_falcon.bin"),
-    'badfalcon': os.path.join("smc", "build", "rgh13_badfalcon.bin"),
+    'falcon': os.path.join("smc", "build", "rgh13_jasper_for_falcon.bin"),
+    'badfalcon': os.path.join("smc", "build", "rgh13_badjasper_for_falcon.bin"),
     'jasper': os.path.join("smc", "build", "rgh13_jasper.bin"),
     'badjasper': os.path.join("smc", "build", "rgh13_badjasper.bin")
 }

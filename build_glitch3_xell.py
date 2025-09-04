@@ -101,17 +101,21 @@ def load_or_die(path: str) -> bytes:
         return f.read()
 
 XELL_TARGETS = {
-    # falcon, badfalcon, jasper, badjasper are "production" ECCs
+    # falcon, badfalcon, jasper, badjasper are "production" ECCs   
+    # FIXME: there is a bug in the Falcon SMC code that results in the board playing blind
+    # For now, use Jasper-on-Falcon SMCs for Falcon targets
+    # See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
     "falcon" : {
         "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_falcon.bin"),
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon.bin"),
         "output":    os.path.join("ecc","rgh13_falcon.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772',
     },
+
     "badfalcon" : {
         "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badfalcon.bin"),
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon.bin"),
         "output":    os.path.join("ecc","rgh13_badfalcon.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772',

@@ -2,13 +2,23 @@
 ; RGH1.3 code for Jasper
 ;
 
+    ; horrible hack 
+ifdef JASPER_FOR_FALCON
+    JASPER equ 0
+
+    ; from rgh13_falcon.s, but also seems to work fine without this
+    RESET_WATCHDOG_TIMEOUT_TICKS equ 137
+else
     JASPER equ 1
+    
+    ; timeout for normal reset watchdog
+    ; default for jasper is 100 * 20 * 2 = 4000 ms
+    RESET_WATCHDOG_TIMEOUT_TICKS equ 100
+endif
 
     .include "jasperdefs.inc"
 
-; timeout for normal reset watchdog
-; default for jasper is 100 * 20 * 2 = 4000 ms
-RESET_WATCHDOG_TIMEOUT_TICKS equ 100
+
 
 ; ------------------------------------------------------------------------------------
 
