@@ -9,9 +9,9 @@ RGH1.3 combines a glitch chip, the RGH3 loader chain, a completely unorthodox pa
 As it ports many RGH3 features to glitch chips, it can facetiously be described as "RGH3, but with a glitch chip". However, it is much more
 aggressive when monitoring the boot process in an attempt to make it as bulletproof as possible.
 
-## WARNING 1: THIS IS EXPERIMENTAL
+## WARNING 1: THIS IS IN BETA
 
-RGH1.3 is experimental. Who knows if this is stable in real world scenarios or not.
+RGH1.3 is no longer experimental and can be called a beta, but it still has bugs that need to be killed.
 You can use it if you want but I can't guarantee it'll work for you. Use it at your own risk!
 
 ## WARNING 2: ACTUAL BOOT TIME IMPROVEMENTS NOT GUARANTEED
@@ -53,7 +53,6 @@ Benefits over RGH3:
 
 Disadvantages:
 - Requires a trace cut (or removal of the tilt switch) and two diodes
-- RGH3 loader is known to break support for older kernels
 - See "Known improvements" below for more information
 
 ## Wiring everything up
@@ -259,6 +258,8 @@ For bug reports, please provide the following:
 - SDRAM manufacturer
 - Southbridge revision/date code
 - etc. etc. You get the picture. More information = better.
+
+See [here](https://github.com/wurthless-elektroniks/RGH1.3/issues) for known bugs.
 
 ## Known issues and improvements
 
