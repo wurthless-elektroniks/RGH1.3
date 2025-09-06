@@ -187,6 +187,33 @@ If you get the message
 
 then your updflash.bin is ready for flashing. Flash that sucker, test your console, tweak glitch chip timings as necessary, and enjoy.
 
+## Running older kernels
+
+The RGH3 loader chain breaks support for older kernels (Blades and Kinect being the most obvious). As such, a script called `g3fix.py`
+is provided that will fix these issues and allow them to boot.
+
+**As this script replaces the manufacturing loader with a retail CB_A, you'll need your CPU key for this step.** You will probably also
+need to install PyCryptodome for the script to even work.
+
+Run it as follows:
+
+`python3 g3fix.py <your-cpu-key> path/to/updflash.bin`
+
+Your output should look something like:
+
+```
+found Jasper-style 16m NAND
+CB_A replaced
+CB_X replaced
+CB_B 6752: skipping SMC HMAC panic
+CB_B padded
+recalculating ECC data...
+writing final NAND...
+dunzo
+```
+
+See [this issue](https://github.com/wurthless-elektroniks/RGH1.3/issues/2) for technical documentation of the bug.
+
 ## Awesome! When's slim support?
 
 `¯\_(ツ)_/¯`
@@ -239,11 +266,6 @@ For bug reports, please provide the following:
   start of CB_B, when the CPU is still coming out of the glitch and can be in an unstable state, so it wouldn't be that
   reliable anyway. Plus which, most failed glitch attempts will die within the first 100 ms, which means we have to monitor
   the POST lines anyway.
-
-- The RGH3 bootloader chain is known to break compatibility with older dashboards (Blades for sure) and those issues likely
-  apply here too. The cause isn't clear, it might have to do with the use of the manufacturing CB_A (retail 9188 and 5772
-  are practically the same code byte for byte). The good news is that RGH1.3 no longer needs precise timings on the SMC
-  side like RGH3 does so we might be able to kill that one easily.
 
 - It's possible to speed up resets on failed attempts simply by resetting the CPU. However, the CPU can go into
   a coma on failed attempts, which will cause it to lock up and ignore any attempts to reset it.

@@ -2,11 +2,7 @@
 g3fix - Script to attempt to fix compatibility issues with the RGH3 v1 loader
 Intended for RGH1.3, might work with RGH3 also.
 
-Current status: No improvement over RGH2to3 patches.
-- Blades (6717): Boots, but kernel displays Christmas lights and halts.
-- NXE (9199): Works, but RGH2to3 supports this already.
-- Kinect (13604): Boots to Christmas lights.
-- Metro (17559): Works, but RGH2to3 supports this already.
+Current status: Works. All kernels boot to dash on both Falcon and Jasper.
 '''
 
 import sys
@@ -18,6 +14,7 @@ import hashlib
 from argparse import ArgumentParser,RawTextHelpFormatter
 import Crypto.Cipher.ARC4 as RC4
 import ecc
+from patcher import assemble_branch
 
 key_1BL = b"\xDD\x88\xAD\x0C\x9E\xD6\x69\xE7\xB5\x67\x94\xFB\x68\x56\x3E\xFA"
 
@@ -134,6 +131,12 @@ def main():
     new_cbx = bytearray(new_cbx)
     new_cbx[0x10:0x20] = cbb_hmac_seed
 
+    # CB_X @ 0x3C0: instead of jumping to CB_B directly,
+    # use what's left of CB_A 5772 to jump to it.
+    # CB_A loads to 0xC000 onwards as does CB_X, but CB_X only loads from 0xC000~0xC400.
+    new_cbx[0x3C0:0x3C4] = bytes([0x7F, 0xE4, 0xFB, 0x78]) # mov r4,r31 (avoid r31 being trashed by cbb_jump)
+    new_cbx, _ = assemble_branch(new_cbx, 0x3C4, 0x478) # jump to CB_A cbb_jump function
+
     insert_pos = 0x8000
 
     (cba_key, encrypted_cba) = encrypt_cba(new_cba, cba_hmac_seed)
@@ -149,6 +152,17 @@ def main():
     cbb = bytearray(cbb)
     cbb += bytes([0] * padding_bytes_required)
     cbb[0x0C:0x10] = struct.pack(">I", len(cbb))
+
+    # FIXME: this is a hack to get around a panic in CB_B.
+    # the best way to do this is to recalculate whatever value here so that the check passes.
+    # for now, though, this works, so we can live with this hack.
+    if cbb[0x6B2C:0x6B30] == bytes([0x40, 0x9A, 0x00, 0x14]):
+        print("CB_B 5772: skipping SMC HMAC panic")
+        cbb, _ = assemble_branch(cbb, 0x6B2C, 0x6B40)
+    elif cbb[0x6B74:0x6B78] == bytes([0x40, 0x9A, 0x00, 0x14]):
+        print("CB_B 6752: skipping SMC HMAC panic")
+        cbb, _ = assemble_branch(cbb, 0x6B74, 0x6B88)
+
     nand_stripped[insert_pos:insert_pos+len(cbb)] = cbb
     print("CB_B padded")
     insert_pos += len(cbb)
