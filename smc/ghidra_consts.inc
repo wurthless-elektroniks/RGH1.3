@@ -38,3 +38,5 @@ BANK3_R4 equ 01Ch
 BANK3_R5 equ 01Dh
 BANK3_R6 equ 01Eh
 BANK3_R7 equ 01Fh
+
+FIFLG equ 0C0h

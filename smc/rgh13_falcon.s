@@ -4,6 +4,9 @@
 
     .include "falcondefs.inc"
 
+RGH13_POST_6 equ gpio_gpu_reset_done
+RGH13_POST_7 equ gpio_tiltsw_n
+
 ; timeout for normal reset watchdog
 ; default is 137 * 20 * 2 = 5480 ms
 RESET_WATCHDOG_TIMEOUT_TICKS equ 137

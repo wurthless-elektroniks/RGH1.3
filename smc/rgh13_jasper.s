@@ -19,6 +19,8 @@ endif
     .include "jasperdefs.inc"
 
 
+RGH13_POST_6 equ gpio_gpu_reset_done
+RGH13_POST_7 equ gpio_tiltsw_n
 
 ; ------------------------------------------------------------------------------------
 

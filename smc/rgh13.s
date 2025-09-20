@@ -110,8 +110,8 @@ on_reset_watchdog_timeout:
 on_reset_watchdog_deassert_cpu_reset:
     ; these POST bits MUST be zero or there's a wiring issue.
     ; in which case, refuse to let the system run.
-    jb gpio_gpu_reset_done,_post_bits_not_zero_at_reset
-    jb gpio_tiltsw_n,_post_bits_not_zero_at_reset
+    jb RGH13_POST_6,_post_bits_not_zero_at_reset
+    jb RGH13_POST_7,_post_bits_not_zero_at_reset
 
     mov r0,#g_turboreset_sm_state   ; enable statemachine
     mov @r0,#1
@@ -152,8 +152,8 @@ turboreset_sm_exec:
 ; state 1 - wait for POST bits 6 and 7 to rise, and throw RRoD if they don't do so in time
 ;
     cjne a,#1,_turboreset_sm_exec_state_2
-    jnb gpio_gpu_reset_done,_turboreset_sm_state_1_timeout
-    jnb gpio_tiltsw_n,_turboreset_sm_state_1_timeout
+    jnb RGH13_POST_6,_turboreset_sm_state_1_timeout
+    jnb RGH13_POST_7,_turboreset_sm_state_1_timeout
 
 _turboreset_go_state_2:
     mov r0,#g_turboreset_sm_state
@@ -197,7 +197,7 @@ _turboreset_do_nothing:
 ;
 _turboreset_sm_exec_state_2:
     cjne a,#2,_turboreset_sm_exec_state_3
-    jnb gpio_tiltsw_n,_turboreset_sm_go_state_3 ; has to fall in time
+    jnb RGH13_POST_7,_turboreset_sm_go_state_3 ; has to fall in time
 
     ; tick timer down
     mov r0,#g_turboreset_sm_counter
@@ -229,7 +229,7 @@ _turboreset_sm_go_state_3:
 ;
 _turboreset_sm_exec_state_3:
     cjne a,#3,_turboreset_sm_exec_state_4
-    jnb gpio_gpu_reset_done,_turboreset_sm_go_state_4
+    jnb RGH13_POST_6,_turboreset_sm_go_state_4
 
 _turboreset_sm_common_timeout_code:
     mov r0,#g_turboreset_sm_counter
@@ -259,7 +259,7 @@ _turboreset_sm_go_state_4:
 ;
 _turboreset_sm_exec_state_4:
     cjne a,#4,_turboreset_sm_exec_state_5
-    jb gpio_tiltsw_n,_turboreset_sm_go_state_5
+    jb RGH13_POST_7,_turboreset_sm_go_state_5
     sjmp _turboreset_sm_common_timeout_code
 
 _turboreset_sm_go_state_5:
@@ -286,8 +286,8 @@ _turboreset_set_leds_and_return:
 ;
 _turboreset_sm_exec_state_5:
     cjne a,#5,_turboreset_sm_exec_state_6
-    jnb gpio_tiltsw_n,_turboreset_sm_go_state_7      ; run as long as POST bit 7 is high
-    jb gpio_gpu_reset_done,_turboreset_sm_go_state_6 ; state 5 waits for rise
+    jnb RGH13_POST_7,_turboreset_sm_go_state_7      ; run as long as POST bit 7 is high
+    jb  RGH13_POST_6,_turboreset_sm_go_state_6      ; state 5 waits for rise
     sjmp _turboreset_sm_common_timeout_code
 
 _turboreset_sm_go_state_6:
@@ -302,8 +302,8 @@ _turboreset_sm_go_state_6:
 
 _turboreset_sm_exec_state_6:
     cjne a,#6,_turboreset_do_nothing
-    jnb gpio_tiltsw_n,_turboreset_sm_go_state_7       ; run as long as POST bit 7 is high
-    jnb gpio_gpu_reset_done,_turboreset_sm_go_state_5 ; state 6 waits for fall
+    jnb RGH13_POST_7,_turboreset_sm_go_state_7     ; run as long as POST bit 7 is high
+    jnb RGH13_POST_6,_turboreset_sm_go_state_5     ; state 6 waits for fall
     sjmp _turboreset_sm_common_timeout_code
 
 _turboreset_sm_go_state_7:
