@@ -381,6 +381,7 @@ _hardreset_sm_check_case_54:
 powerup_event_callback:
     ; lcall overwrote these
     ; these are consistent between falcon/jasper so excuse the hardcoding
+    ; (they are also the same on xenon)
     clr 020h.3 ; this is normally set in the IPC poweron/reset command
     clr 021h.1 ; "eject button pressed" flag
 

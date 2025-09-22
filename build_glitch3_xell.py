@@ -11,6 +11,7 @@ import os
 from ecc import NandType, ecc_encode
 from smc import encrypt_smc
 
+from xell.patch_1940_xell import xell1940_do_patches
 from xell.patch_5772_xell import xell5772_do_patches
 from xell.patch_6752_xell import xell6752_do_patches
 from cbbpatch import rgh13cbb_do_patches
@@ -135,6 +136,14 @@ XELL_TARGETS = {
         "cbb":       '6752'
     },
 
+    "xenon" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_xenon.bin"),
+        "output":    os.path.join("ecc","rgh13_xenon.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '1940',
+    },
+
     # test ECC for testing CB_B patches
     "test_falcon_resetme": {
         "nandtype":  NandType.NAND_16M,
@@ -165,12 +174,15 @@ def main():
     cd   = load_or_die("cd/cd_xell.bin")
     xell = load_or_die("xell/xell.bin")
 
+    cbb_1940 = load_or_die(os.path.join("cbb","cb_1940_clean.bin"))
+    cbb_1940 = xell1940_do_patches(cbb_1940)
     cbb_5772 = load_or_die(os.path.join("cbb","cbb_5772_clean.bin"))
     cbb_5772 = xell5772_do_patches(cbb_5772)
     cbb_6752 = load_or_die(os.path.join("cbb","cbb_6752_clean.bin"))
     cbb_6752 = xell6752_do_patches(cbb_6752)
 
-    # RGH1.3 postcounter patches are the same between 5772/6752
+    # rgh13cbb_do_patches() autodetects which patches to apply then applies them
+    cbb_1940 = rgh13cbb_do_patches(cbb_1940)
     cbb_5772 = rgh13cbb_do_patches(cbb_5772)
     cbb_6752 = rgh13cbb_do_patches(cbb_6752)
 
@@ -178,6 +190,7 @@ def main():
         f.write(cbb_5772)
 
     cbbs = {
+        '1940': cbb_1940,
         '5772': cbb_5772,
         '6752': cbb_6752
     }

@@ -115,6 +115,12 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badjasper_for_falcon_overlay.bin",
         "output": "rgh13_badjasper_for_falcon.bin"
     },
+    "xenon": {
+        "clean_smc_name": "xenon_clean.bin",
+        "asm_name": "rgh13_xenon.s",
+        "overlay_name": "rgh13_xenon_overlay.bin",
+        "output": "rgh13_xenon.bin"
+    }
 
 }
 
