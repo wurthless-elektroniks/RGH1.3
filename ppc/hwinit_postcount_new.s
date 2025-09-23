@@ -53,7 +53,7 @@ hwinit_delay_case:
 _hwinit_delay_loop:
     mftb %r7
     cmpld %r7,%r8
-    bgt hwinit_toggle_post            # original instruction is a ble
+    bgt hwinit_interpreter_top            # original instruction is a ble
 
     bl toggle_post
 
