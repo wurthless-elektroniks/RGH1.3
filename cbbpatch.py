@@ -91,7 +91,7 @@ def rgh13cbb_do_patches(cbb_image: bytes):
 
         # 0x0DC4: reroute success case through done stub
         cbb_image, _ = assemble_branch(cbb_image, 0x0DC4, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 12)
-    
+
     # for 1940, which has the hwinit code later on
     elif cbb_image[0x3408:0x340C] == bytes([0x48, 0x00, 0x03, 0x85]) and \
        cbb_image[0x345C:0x3460] == bytes([0x1C, 0xC6, 0x00, 0x32]) and \
@@ -107,6 +107,37 @@ def rgh13cbb_do_patches(cbb_image: bytes):
         cbb_image, _ = assemble_branch(cbb_image, 0x3408, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 0) # init
         cbb_image, _ = assemble_branch(cbb_image, 0x345C, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 4) # delay
         cbb_image, _ = assemble_branch(cbb_image, 0x37EC, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 8) # success
+
+    # 4577 (Zephyr) also has hwinit code late in the binary
+    elif cbb_image[0x4BD8:0x4BDC] == bytes([0x48, 0x00, 0x03, 0xB1]) and \
+       cbb_image[0x4C2C:0x4C30] == bytes([0x1C, 0xC6, 0x00, 0x32]) and \
+       cbb_image[0x4FF0:0x4FF4] == bytes([0x38, 0xA0, 0x00, 0x01]):
+        print("cbbpatch: found 4577")
+        
+        cbb_image = assemble_hwinit_postcount_block_universal(cbb_image,
+                                                              HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS,
+                                                              0x4F88,
+                                                              0x4BDC,
+                                                              0x4FFC)
+
+        cbb_image, _ = assemble_branch(cbb_image, 0x4BD8, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 0) # init
+        cbb_image, _ = assemble_branch(cbb_image, 0x4C2C, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 4) # delay
+        cbb_image, _ = assemble_branch(cbb_image, 0x4FF0, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 8) # success
+    # 7378 (Elpis)
+    elif cbb_image[0x0958:0x95C] == bytes([0x48, 0x00, 0x03, 0xC9]) and \
+       cbb_image[0x09AC:0x09B0] == bytes([0x1C, 0xC6, 0x00, 0x32]) and \
+       cbb_image[0x0D88:0x0D8C] == bytes([0x38, 0xA0, 0x00, 0x01]):
+        print("cbbpatch: found 7378")
+        
+        cbb_image = assemble_hwinit_postcount_block_universal(cbb_image,
+                                                              HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS,
+                                                              0x0D20,
+                                                              0x095C,
+                                                              0x0D94)
+
+        cbb_image, _ = assemble_branch(cbb_image, 0x0958, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 0) # init
+        cbb_image, _ = assemble_branch(cbb_image, 0x09AC, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 4) # delay
+        cbb_image, _ = assemble_branch(cbb_image, 0x0D88, HWINIT_POSTCOUNT_BLOCK_BASE_ADDRESS + 8) # success
     else:
         raise RuntimeError("unrecognized CB_B, cannot continue")
 

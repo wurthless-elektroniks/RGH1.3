@@ -118,6 +118,11 @@ def main():
     #    f.write(cbb)
 
     smctype = ""
+
+    # TODO: jrunner's annoying falcon-for-xenon behavior will break things here
+    # especially because when it builds RGH3 images it'll build a falcon image.
+    # if falcon found we probably need to force the user to specify --board xenon
+    # or --board falcon
     if cbb_version == 5772 and cbb_hash == SHA1_CBB_5772_XEBUILD:
         print("found xeBuild-patched Falcon CB_B")
         smctype = "falcon"
