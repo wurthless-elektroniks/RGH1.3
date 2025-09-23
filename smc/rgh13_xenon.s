@@ -25,16 +25,18 @@ CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 35
 ; 0xBC and upward seem unused so we use that.
 ; first up, variables that are supposed to get zeroed out on reset
 ; (0xBD clear loop will be patched to zero them)
-g_holdpowerbutton_counter               equ 0B8h
-g_turboreset_sm_state                   equ 0B9h
-g_turboreset_sm_counter                 equ 0BAh
-g_ledlightshow_watchdog_state           equ 0BBh
-g_ledlightshow_watchdog_death_counter   equ 0BCh
+
+VARBASE equ 0B0h
+g_holdpowerbutton_counter               equ VARBASE+0
+g_turboreset_sm_state                   equ VARBASE+1
+g_turboreset_sm_counter                 equ VARBASE+2
+g_ledlightshow_watchdog_state           equ VARBASE+3
+g_ledlightshow_watchdog_death_counter   equ VARBASE+4
 
 ; above that are variables that will persist between resets
-g_hardreset_sm_init                     equ 0B5h
-g_hardreset_sm_state                    equ 0B6h
-g_power_up_cause_backup                 equ 0B7h
+g_hardreset_sm_init                     equ VARBASE-3
+g_hardreset_sm_state                    equ VARBASE-2
+g_power_up_cause_backup                 equ VARBASE-1
 
 ; ------------------------------------------------------------------------------------
 ;
@@ -51,6 +53,9 @@ g_power_up_cause_backup                 equ 0B7h
 
     mov dptr,#memclear_reposition_start
     mov dptr,#memclear_reposition_end
+
+    mov dptr,#ipc_setled_reroute_start
+    mov dptr,#ipc_setled_reroute_end
 
     mov dptr,#resetwatchdog_release_cpu_reset_start
     mov dptr,#resetwatchdog_release_cpu_reset_end
@@ -114,9 +119,14 @@ mainloop_reorg_end:
     ; so our work vars get init'd to zero
     .org 0x07DE
 memclear_reposition_start:
-    mov r0,#0xB8
-    mov r2,#(0xC2-0xB8)
+    mov r0,#VARBASE
+    mov r2,#(0xC2-VARBASE)
 memclear_reposition_end:
+
+    .org 0xB93
+ipc_setled_reroute_start:
+    ljmp ipc_led_anim_has_arrived
+ipc_setled_reroute_end:
 
 
     .org 0x1148
@@ -164,6 +174,26 @@ powerup_reroute_end:
     .org 0x224E
 dbgled_readfcn_stubout_start:
     ret
+
+; quality of life improvement: if no avpack present, pretend a composite cable
+; is plugged in, so the system can boot headless without flashing the four red lights
+;
+; from https://gamesx.com/wiki/doku.php?id=av:xbox360av
+; the avpack mode lines are pulled up by resistors on the motherboard
+; and the cables themselves pull the pins low.
+; if all avpack bits are 1, nothing's present.
+avpack_detect_reroute:
+    lcall 0x2506 ; query avpack id and other stuff (bits 4~2 will be avpack id)
+    push acc
+    anl a,#0b11100
+    cjne a,#0b11100,_avpack_is_present
+    pop acc
+    anl a,#0b11100011
+    ret
+_avpack_is_present:
+    pop acc
+    ret
+    
 dbgled_readfcn_stubout_end:
 
 
@@ -185,25 +215,6 @@ port3_ddr_set_all_inputs_2_end:
     .org 0x2DAA
 rgh13_common_code_start:
 
-
-; quality of life improvement: if no avpack present, pretend a composite cable
-; is plugged in, so the system can boot headless without flashing the four red lights
-;
-; from https://gamesx.com/wiki/doku.php?id=av:xbox360av
-; the avpack mode lines are pulled up by resistors on the motherboard
-; and the cables themselves pull the pins low.
-; if all avpack bits are 1, nothing's present.
-avpack_detect_reroute:
-    lcall 0x2506 ; query avpack id and other stuff (bits 4~2 will be avpack id)
-    push acc
-    anl a,#0b11100
-    cjne a,#0b11100,_avpack_is_present
-    pop acc
-    anl a,#0b11100011
-    ret
-_avpack_is_present:
-    pop acc
-    ret
 
 cpu_reset_handler:
     lcall on_reset_watchdog_deassert_cpu_reset
