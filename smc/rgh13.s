@@ -20,17 +20,26 @@ BOOTROM_TIMEOUT   equ 50
 
 ; amount of time CB_A has to finish execution and de-assert POST bit 7.
 ; default value is 16 * 20 = 320 ms
+; for EXT+3 it's 8
+ifdef EXT_PLUS_3
+CBA_POST7_TIMEOUT equ 8
+else
 CBA_POST7_TIMEOUT equ 16
+endif
 
 ; amount of time CB_X has to load and run CB_B.
 ; you may need to adjust this for certain CB_Bs.
 ; default value is 4 * 20 = 80 ms
+ifndef CBX_POST6_TIMEOUT
 CBX_POST6_TIMEOUT equ 4
+endif
 
 ; amount of time CB_B has to make it to HWINIT.
 ; remember: CB_B is hacked to assert POST bit 7 while HWINIT is running.
 ; default value is  12 * 20 = 240 ms
+ifndef CBB_PRE_HWINIT_POST7_TIMEOUT
 CBB_PRE_HWINIT_POST7_TIMEOUT equ 12
+endif
 
 ; CBB_HWINIT_POST6_TOGGLE_TIMEOUT in rgh13_falcon.s and rgh13_jasper.s
 ; specifies the period between which POST bit 6 must toggle during HWINIT.
