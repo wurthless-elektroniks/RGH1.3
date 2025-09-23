@@ -11,7 +11,7 @@ RGH13_POST_7 equ gpio_dbg_led2
 ; TODO: find safe value for this - for now we're leaving it be
 RESET_WATCHDOG_TIMEOUT_TICKS equ 0xAF
 
-CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 35
+CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 254
 
 ; ------------------------------------------------------------------------------------
 
@@ -193,7 +193,7 @@ avpack_detect_reroute:
 _avpack_is_present:
     pop acc
     ret
-    
+
 dbgled_readfcn_stubout_end:
 
 

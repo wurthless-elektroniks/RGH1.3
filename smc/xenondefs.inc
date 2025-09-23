@@ -20,7 +20,7 @@ g_rrod_base_error_pattern equ 05Ch
 g_power_up_cause equ 061h
 
 ; these flags all trigger RRoD
-g_force_rrod_3                          equ 023h.1
+g_force_rrod_3                          equ 023h.5 ; guessed
 g_force_rrod_4                          equ 023h.2
 g_force_rrod_ipc                        equ 023h.4
 
