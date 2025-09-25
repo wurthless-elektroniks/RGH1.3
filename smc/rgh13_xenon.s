@@ -17,11 +17,6 @@ CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 254
 ; (PLL is basically useless on Waternoose)
 EXT_PLUS_3 equ 1
 
-; numerous overrides for timings in rgh13.s needed
-; these are nowhere near accurate but they work
-CBX_POST6_TIMEOUT equ 50
-CBB_PRE_HWINIT_POST7_TIMEOUT equ 50
-
 ; ------------------------------------------------------------------------------------
 
 ; the Xenon SMC program is really weird in that it leaves large chunks of memory uninitialized

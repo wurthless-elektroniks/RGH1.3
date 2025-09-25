@@ -1,13 +1,12 @@
-# Yes I know there's a softmod coming
-
-This was developed mostly before the softmod was announced. I'm releasing it anyway because the code here might be of use to someone.
-
-# RGH1.3: Fast Boots For Fat 360s
+# RGH1.3 and EXT+3: Fast Boots For Fat 360s
 
 RGH1.3 combines a glitch chip, the RGH3 loader chain, a completely unorthodox patched CB_B and a hacked SMC image to rapidly glitch the CPU.
 
 As it ports many RGH3 features to glitch chips, it can facetiously be described as "RGH3, but with a glitch chip". However, it is much more
 aggressive when monitoring the boot process in an attempt to make it as bulletproof as possible.
+
+Also included in this project is EXT+3. It is the EXT_CLK equivalent of RGH1.3, allowing for much faster boot attempts on Xenon and Zephyr
+consoles.
 
 ## WARNING 1: THIS IS IN BETA
 
@@ -57,50 +56,10 @@ Disadvantages:
 
 ## Wiring everything up
 
-Now first up is how you wire up your glitch chip. It's the exact same pinout as RGH1.2.
-In case you need a reminder, here's the list:
+This depends on your board and method:
 
-Matrix:
-- A = /CPU_RST_1V1P_N
-- B = FT6U1 (POST bit 0)
-- C = STBY_CLK
-- F = CPU_PLL_BYPASS
-
-You will also need two diodes (1N400x slow power diodes will work, speed's not critical here):
-- GPU_RESET_DONE/SMC_POST --> diode --> FT6U2 (POST bit 6)
-- TILTSW --> diode --> FT6U8 (POST bit 7)
-
-**IMPORTANT: The tilt switch MUST be disabled (with a trace cut) or removed.** Not like anyone will miss it, anyway.
-
-Here's a professionally made diagram showing where you should solder things. Route wires at your own discretion.
-It's better to keep your wires short and to avoid the high speed busses and power rail inductors whenever possible.
-
-![](rgh13_points_top.png)
-
-![](rgh13_points_bottom.png)
-
-Connect your Matrix or whatever to your programmer, **MAKING SURE YOU AREN'T CONNECTING IT IN REVERSE
-POLARITY BECAUSE YOU WILL FRY THE GLITCH CHIP IF YOU DO.** Most Matrix chips don't come with a pin
-header; if you're looking for one, it's just standard 2.54mm pitch male pins. You can get long strips of them
-and cut them to fit.
-
-In J-Runner, click "Program Timing Files". Then, select Program -> Choose timing file, and choose the
-timing file you want to program. You should see the thing program your Matrix. Awesome job, your chip's
-programmed. You might need to program it multiple times before you're satisfied, so keep your programmer
-around.
-
-The timing file you should start with is `rgh13_pw2_d21.xsvf`. Play around with them until you find
-one that your console likes. Additional pulse widths are provided in case your console likes wider
-pulse widths.
-
-**For people wanting to use the bodge capacitor:** RGH1.3 glitches so rapidly that you'll get misleading
-results with the glitch chip's blinking LED. The SMC code can catch major CPU issues (see error handling
-info below) but it won't be able to diagnose how much noise is on the PLL line.
-
-Tips for capacitor users:
-- 68 nF (0.068 uF) and 100 nf (0.1 uF) are the common capacitor values
-- Matrix users MUST ensure the glitch chip AND the capacitor are properly grounded or there will be too much noise
-- You can see how the glitch chip LED behaves under RGH1.2 to better diagnose PLL noise
+- [EXT+3 for Xenon/Elpis](install_ext3_xenon.md)
+- [RGH1.3 for Zephyr/Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md)
 
 ## Flashing XeLL
 
@@ -231,19 +190,24 @@ it could be easily ported to RGH3.
 
 Not supported with these xsvfs but could be added easily. Why do you need two NANDs anyway. Don't be silly. 360s are cheap these days.
 
-## How about a port to EXT_CLK for us EXT_CLKsuckers?
-
-EXT_CLK will benefit enormously from this technique since the instaboot rate is lower than it is on RGH1.2.
-I've tried it with Raspberry Pi Pico where it was called EXT+3. It will require a couple of pullup resistors on the DBG_LED
-lines on Xenon/Elpis. Zephyr can practically use the same install method as Falcon/Jasper since Zephyr is basically a Falcon with
-a Waternoose. Also, EXT_CLK glitch attempts run faster than with PLL slowdown, so EXT+3 may as well be ported to the other phats too.
-
 ## Wow, this shit sucks. Why even bother doing this? RGH1.2 works for me!
 
 In professional software development, we focus on valid use cases and reliability, not the #WorksForMe mentality and sneering elitism that
 makes the 360 scene suck so much. If you are a professional modder, then please get a real job, and by that, I mean a job where
 you actually have to work with team members and have a boss, and where you have to collaborate with all of them in order to keep
 your position and pay the bills. Then we'll see how far that attitude gets you in real life.
+
+## Hah! There's a softmod coming and I've been using ABadDildo for months now. Why the fuck would anyone use this?
+
+Oh my god, you people too???
+
+Okay, let's be rational. RGH didn't obsolete JTAG and softmods haven't obsoleted either of those. The only thing that will
+obsolete RGH for good (as well as JTAG and any softmods) is the release of the RSA-2048 private keys used to sign the
+bootloaders, or a signed bootloader stub that breaks the chain of trust.
+
+If you're softmodding your system to play the hottest zero-day warez of the 2010s, all the power to you. But softmods still
+have a ways to go before they'll be on par with RGH and JTAG (*hint to kernel hackers: instead of payloads like XeUnshackle,
+you should try to reboot the system into a hacked state like how JTAG does it*).
 
 ## Help! I am stuck in a washing machine!
 

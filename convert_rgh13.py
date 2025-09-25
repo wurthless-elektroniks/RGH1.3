@@ -8,7 +8,8 @@ from cbbpatch import rgh13cbb_do_patches
 import ecc
 import os
 
-# somehow, the Jasper images use the exact same SMC, I don't know why
+# RGH3 v1 uses the same SMC for Falcon and Jasper, likely because they're compatible
+# We expect these for all phat builds
 SHA1_FALCON_RGH3_27MHZ = "9b89a53dbdb4735782e92b70bb5e956f6b35da5f"
 SHA1_FALCON_RGH3_10MHZ = "a4ae6a6f1ff374739d1c91f8a2881f4eecc210d3"
 
@@ -16,11 +17,17 @@ SHA1_FALCON_RGH3_10MHZ = "a4ae6a6f1ff374739d1c91f8a2881f4eecc210d3"
 SHA1_CBB_5772_XEBUILD = "3a8fb9580ce01cf1c0e2d885e0fd96a05571643f"
 SHA1_CBB_6752_XEBUILD = "899cd01e00ef7b27ceb010dde42e4d6e9c871330"
 
+# TODO: calc hash of patched elpiss 7378 now that jrunner is supporting it
+SHA1_CBB_7378_ELPISS  = ""
+
 def _init_argparser():
     argparser = ArgumentParser(formatter_class=RawTextHelpFormatter,
                                prog='convert_rgh13',
-                               description='Converts RGH3 NAND to RGH1.3')
+                               description='Converts RGH3 NAND to RGH1.3/EXT+3')
     
+    argparser.add_argument("--board",
+                           help="Specifies target board (xenon, zephyr, falcon, jasper). Required for some CB_B versions.")
+
     argparser.add_argument("--badjasper",
                            default=False,
                            action='store_true',
@@ -36,6 +43,7 @@ def _init_argparser():
 # For now, use Jasper-on-Falcon SMCs for Falcon targets
 # See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
 SMC_FILEPATH_MAP = {
+    'xenon': os.path.join("smc", "build", "rgh13_xenon.bin"),
     'falcon': os.path.join("smc", "build", "rgh13_jasper_for_falcon.bin"),
     'badfalcon': os.path.join("smc", "build", "rgh13_badjasper_for_falcon.bin"),
     'jasper': os.path.join("smc", "build", "rgh13_jasper.bin"),
@@ -125,7 +133,18 @@ def main():
     # or --board falcon
     if cbb_version == 5772 and cbb_hash == SHA1_CBB_5772_XEBUILD:
         print("found xeBuild-patched Falcon CB_B")
-        smctype = "falcon"
+
+        # J-Runner's annoying Falcon-for-Xenon behavior forces us to do this
+        if args.board is None:
+            print("error: ambiguous target board. please specify --board xenon or --board falcon")
+            return
+        
+        if args.board not in [ "xenon", "falcon" ]:
+            print("error: 5772 should only be present on falcon and falcon-for-xenon builds")
+            return
+
+        smctype = args.board
+
     elif cbb_version == 6752 and cbb_hash == SHA1_CBB_6752_XEBUILD:
         print("found xeBuild-patched Jasper CB_B")
         smctype = "jasper"
@@ -134,8 +153,12 @@ def main():
         return
 
     if args.badjasper is True:
-        print("badjasper mode enabled!")
         smctype = "bad"+smctype
+        if smctype not in SMC_FILEPATH_MAP:
+            print("error: no badjasper SMC build exists for that board")
+            return
+        
+        print("badjasper mode enabled!")
 
     smcpath = SMC_FILEPATH_MAP[smctype]
     print(f"attempting to read SMC from: {smcpath}")
