@@ -14,6 +14,7 @@ from smc import encrypt_smc
 from xell.patch_1940_xell import xell1940_do_patches
 from xell.patch_5772_xell import xell5772_do_patches
 from xell.patch_6752_xell import xell6752_do_patches
+from xell.patch_7378_xell import xell7378_do_patches
 from cbbpatch import rgh13cbb_do_patches
 
 key_1BL = b"\xDD\x88\xAD\x0C\x9E\xD6\x69\xE7\xB5\x67\x94\xFB\x68\x56\x3E\xFA"
@@ -144,6 +145,22 @@ XELL_TARGETS = {
         "cbb":       '1940',
     },
 
+    "xenon_5772" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_xenon.bin"),
+        "output":    os.path.join("ecc","rgh13_xenon_5772.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772',
+    },
+
+    "elpis" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_xenon.bin"),
+        "output":    os.path.join("ecc","rgh13_elpis.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '7378',
+    },
+
     # test ECC for testing CB_B patches
     "test_falcon_resetme": {
         "nandtype":  NandType.NAND_16M,
@@ -181,18 +198,21 @@ def main():
     cbb_6752 = load_or_die(os.path.join("cbb","cbb_6752_clean.bin"))
     cbb_6752 = xell6752_do_patches(cbb_6752)
 
+    cbb_7378 = load_or_die(os.path.join("cbb","cbb_7378_clean.bin"))
+    cbb_7378 = xell7378_do_patches(cbb_7378)
+
+
     # rgh13cbb_do_patches() autodetects which patches to apply then applies them
     cbb_1940 = rgh13cbb_do_patches(cbb_1940)
     cbb_5772 = rgh13cbb_do_patches(cbb_5772)
     cbb_6752 = rgh13cbb_do_patches(cbb_6752)
-
-    with open("debug.bin", "wb") as f:
-        f.write(cbb_5772)
+    cbb_7378 = rgh13cbb_do_patches(cbb_7378)
 
     cbbs = {
         '1940': cbb_1940,
         '5772': cbb_5772,
-        '6752': cbb_6752
+        '6752': cbb_6752,
+        '7378': cbb_7378
     }
 
     try:
