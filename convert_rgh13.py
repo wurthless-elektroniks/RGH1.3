@@ -147,6 +147,11 @@ def main():
 
     elif cbb_version == 6752 and cbb_hash == SHA1_CBB_6752_XEBUILD:
         print("found xeBuild-patched Jasper CB_B")
+
+        if args.board is not None and args.board != "jasper":
+            print("error: jasper loader used on non-jasper board. don't be silly!")
+            return
+
         smctype = "jasper"
     else:
         print(f"error: unrecognized/unsupported CB_B version (hash was: {cbb_hash})")
