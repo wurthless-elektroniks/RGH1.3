@@ -42,3 +42,5 @@ BANK3_R7 equ 01Fh
 FIFLG equ 0C0h
 
 DAT_SFR_a5 equ 0A5h
+
+RCLK equ 0C8h.5

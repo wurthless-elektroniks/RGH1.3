@@ -22,3 +22,6 @@ gpio_hdmi_ddc_clk                       equ FIFLG.4
 gpio_av_mode0                           equ FIFLG.5
 gpio_av_mode1                           equ FIFLG.6
 gpio_av_mode2                           equ FIFLG.7
+
+
+gpio_ext_pwr_on_n                       equ RCLK
