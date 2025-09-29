@@ -33,6 +33,16 @@ def _init_argparser():
                            action='store_true',
                            help="Use badjasper SMC if specified")
     
+    argparser.add_argument("--tiltsw",
+                           default=False,
+                           action='store_true',
+                           help="Use tiltswitch method SMC for Zephyr/Falcon/Jasper")
+
+    argparser.add_argument("--extpwr",
+                           default=False,
+                           action='store_true',
+                           help="Use EXT_PWR_ON_N method SMC for Zephyr/Falcon/Jasper")
+
     argparser.add_argument("updflash",
                            nargs='?',
                            help="Path to updflash.bin (WARNING: FILE WILL BE OVERWRITTEN)")
@@ -44,10 +54,16 @@ def _init_argparser():
 # See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
 SMC_FILEPATH_MAP = {
     'xenon': os.path.join("smc", "build", "rgh13_xenon.bin"),
-    'falcon': os.path.join("smc", "build", "rgh13_jasper_for_falcon.bin"),
-    'badfalcon': os.path.join("smc", "build", "rgh13_badjasper_for_falcon.bin"),
-    'jasper': os.path.join("smc", "build", "rgh13_jasper.bin"),
-    'badjasper': os.path.join("smc", "build", "rgh13_badjasper.bin")
+
+    'falcon_tiltsw': os.path.join("smc", "build", "rgh13_jasper_for_falcon.bin"),
+    'badfalcon_tiltsw': os.path.join("smc", "build", "rgh13_badjasper_for_falcon.bin"),
+    'jasper_tiltsw': os.path.join("smc", "build", "rgh13_jasper.bin"),
+    'badjasper_tiltsw': os.path.join("smc", "build", "rgh13_badjasper.bin"),
+
+    'falcon_extpwr': os.path.join("smc", "build", "rgh13_jasper_for_falcon_extpwr.bin"),
+    'badfalcon_extpwr': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_extpwr.bin"),
+    'jasper_extpwr': os.path.join("smc", "build", "rgh13_jasper_extpwr.bin"),
+    'badjasper_extpwr': os.path.join("smc", "build", "rgh13_badjasper_extpwr.bin"),
 }
 
 def main():
@@ -157,6 +173,11 @@ def main():
         print(f"error: unrecognized/unsupported CB_B version (hash was: {cbb_hash})")
         return
 
+    if smctype in [ "zephyr", "falcon", "jasper" ] and \
+        ((args.tiltsw is False and args.extpwr is False) or (args.tiltsw is True and args.extpwr is True)):
+        print("error: must specify --tiltsw OR --extpwr for zephyr/falcon/jasper boards depending on your install")
+        return
+
     if args.badjasper is True:
         smctype = "bad"+smctype
         if smctype not in SMC_FILEPATH_MAP:
@@ -164,6 +185,11 @@ def main():
             return
         
         print("badjasper mode enabled!")
+    
+    if args.tiltsw is True:
+        smctype += "_tiltsw"
+    elif args.extpwr is True:
+        smctype += "_extpwr"
 
     smcpath = SMC_FILEPATH_MAP[smctype]
     print(f"attempting to read SMC from: {smcpath}")
@@ -172,6 +198,7 @@ def main():
     with open(smcpath,"rb") as f:
         smcdata = f.read()
 
+    # TODO: corona/chesty SMCs are 0x3800 bytes. this works fine for xsb/psb smcs though.
     if len(smcdata) != 0x3000:
         print("error: SMC somehow was not 0x3000 bytes. stopping.")
         return

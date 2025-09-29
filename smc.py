@@ -47,3 +47,49 @@ def decrypt_smc(data: bytes) -> bytes:
     res = res[-8:-4] + res[4:-8] + b"\x00"*8
 
     return res
+
+def _rol64(val: int, count: int) -> int:
+    for _ in range(0,count):
+        carry = (val & 0x8000000000000000) != 0
+        val <<= 1
+        val &= 0xFFFFFFFFFFFFFFFF
+        if carry is True:
+            val |= 1
+    return val
+
+def calc_smc_checksum(cyphertext: bytes, seed: list = None) -> list:
+    '''
+    Recalc SMC checksum from encrypted SMC image.
+    Based on CB_B 6752 function @ 0x7DB0.
+    '''
+    if (len(cyphertext) & 3) != 0:
+        raise RuntimeError("cyphertext must be a multiple of 4 bytes")
+
+    pos = 0
+
+    sumval = 0
+    diffval = 0
+    if seed is not None:
+        sumval  = seed[0]
+        diffval = seed[1]
+
+    while pos < len(cyphertext):
+        dat = struct.unpack(">I", cyphertext[pos:pos+4])[0]
+
+        sumval += dat
+        sumval &= 0xFFFFFFFFFFFFFFFF
+
+        diffval -= dat
+        
+        # convert to 2s complement on underflow
+        if diffval < 0:
+            diffval += 2**64
+
+        diffval &= 0xFFFFFFFFFFFFFFFF
+
+        sumval = _rol64(sumval, 0x1D)
+        diffval = _rol64(diffval, 0x1F)
+
+        pos += 4
+    
+    return [sumval, diffval]

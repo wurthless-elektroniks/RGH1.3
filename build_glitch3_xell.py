@@ -107,36 +107,65 @@ XELL_TARGETS = {
     # FIXME: there is a bug in the Falcon SMC code that results in the board playing blind
     # For now, use Jasper-on-Falcon SMCs for Falcon targets
     # See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
-    "falcon" : {
+    "falcon_tiltsw" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon.bin"),
-        "output":    os.path.join("ecc","rgh13_falcon.ecc"),
+        "output":    os.path.join("ecc","rgh13_falcon_tiltsw.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772',
     },
 
-    "badfalcon" : {
+    "badfalcon_tiltsw" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon.bin"),
-        "output":    os.path.join("ecc","rgh13_badfalcon.ecc"),
+        "output":    os.path.join("ecc","rgh13_badfalcon_tiltsw.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772',
     },
-    "jasper" : {
+    "jasper_tiltsw" : {
         "nandtype": NandType.NAND_16M_JASPER,
         "smc":      os.path.join("smc","build","rgh13_jasper.bin"),
-        "output":   os.path.join("ecc","rgh13_jasper.ecc"),
+        "output":   os.path.join("ecc","rgh13_jasper_tiltsw.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":      '6752',
     },
-    "badjasper": {
+    "badjasper_tiltsw": {
         "nandtype":  NandType.NAND_16M_JASPER,
         "smc":       os.path.join("smc","build","rgh13_badjasper.bin"),
-        "output":    os.path.join("ecc","rgh13_badjasper.ecc"),
+        "output":    os.path.join("ecc","rgh13_badjasper_tiltsw.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752'
     },
 
+    "falcon_extpwr" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_extpwr.bin"),
+        "output":    os.path.join("ecc","rgh13_falcon_extpwr.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772',
+    },
+    "badfalcon_extpwr" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_extpwr.bin"),
+        "output":    os.path.join("ecc","rgh13_badfalcon_extpwr.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772',
+    },
+    "jasper_extpwr" : {
+        "nandtype": NandType.NAND_16M_JASPER,
+        "smc":      os.path.join("smc","build","rgh13_jasper_extpwr.bin"),
+        "output":   os.path.join("ecc","rgh13_jasper_extpwr.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":      '6752',
+    },
+    "badjasper_extpwr": {
+        "nandtype":  NandType.NAND_16M_JASPER,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_extpwr.bin"),
+        "output":    os.path.join("ecc","rgh13_badjasper_extpwr.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '6752'
+    },
+    
     "xenon" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_xenon.bin"),
@@ -144,7 +173,6 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '1940',
     },
-
     "xenon_5772" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_xenon.bin"),

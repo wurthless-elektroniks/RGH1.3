@@ -91,7 +91,8 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badfalcon_overlay.bin",
         "output": "rgh13_badfalcon.bin"
     },
-    "jasper_rgh13_extpwr" : {
+
+    "jasper_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_jasper_extpwr.s",              
         "overlay_name": "rgh13_jasper_extpwr_overlay.bin",
@@ -103,17 +104,18 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_jasper_overlay.bin",
         "output": "rgh13_jasper.bin"
     },
+
+    "badjasper_extpwr_rgh13" : {
+        "clean_smc_name": "jasper_clean.bin",            
+        "asm_name": "rgh13_badjasper_extpwr.s",              
+        "overlay_name": "rgh13_badjasper_extpwr_overlay.bin",
+        "output": "rgh13_badjasper_extpwr.bin"
+    },
     "badjasper_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_badjasper.s",              
         "overlay_name": "rgh13_badjasper_overlay.bin",
         "output": "rgh13_badjasper.bin"
-    },
-    "jasper_for_falcon_rgh13" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper_for_falcon.s",              
-        "overlay_name": "rgh13_jasper_for_falcon_overlay.bin",
-        "output": "rgh13_jasper_for_falcon.bin"
     },
     "jasper_for_falcon_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
@@ -121,12 +123,25 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_jasper_for_falcon_extpwr_overlay.bin",
         "output": "rgh13_jasper_for_falcon_extpwr.bin"
     },
+    "jasper_for_falcon_rgh13" : {
+        "clean_smc_name": "jasper_clean.bin",            
+        "asm_name": "rgh13_jasper_for_falcon.s",              
+        "overlay_name": "rgh13_jasper_for_falcon_overlay.bin",
+        "output": "rgh13_jasper_for_falcon.bin"
+    },
+    "badjasper_for_falcon_extpwr_rgh13" : {
+        "clean_smc_name": "jasper_clean.bin",            
+        "asm_name": "rgh13_badjasper_for_falcon_extpwr.s",              
+        "overlay_name": "rgh13_badjasper_for_falcon_extpwr_overlay.bin",
+        "output": "rgh13_badjasper_for_falcon_extpwr.bin"
+    },
     "badjasper_for_falcon_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_badjasper_for_falcon.s",              
         "overlay_name": "rgh13_badjasper_for_falcon_overlay.bin",
         "output": "rgh13_badjasper_for_falcon.bin"
     },
+
     "xenon": {
         "clean_smc_name": "xenon_clean.bin",
         "asm_name": "rgh13_xenon.s",

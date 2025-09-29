@@ -1,6 +1,9 @@
 ;
 ; RGH1.3 code for Jasper
 ;
+; TODO: unify this with rgh13_jasper.s. c51asm headaches with ifdef/endif errors
+; forced this to be split into two files for now
+;
 
     ; horrible hack 
 ifdef JASPER_FOR_FALCON
