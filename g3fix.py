@@ -162,6 +162,9 @@ def main():
     elif cbb[0x6B74:0x6B78] == bytes([0x40, 0x9A, 0x00, 0x14]):
         print("CB_B 6752: skipping SMC HMAC panic")
         cbb, _ = assemble_branch(cbb, 0x6B74, 0x6B88)
+    else:
+        print("WARNING: unrecognized CB_B or your image was already patched")
+        print("bad things might happen if you flash the resulting image...")
 
     nand_stripped[insert_pos:insert_pos+len(cbb)] = cbb
     print("CB_B padded")
