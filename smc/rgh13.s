@@ -310,7 +310,7 @@ _turboreset_sm_go_state_6:
     sjmp _turboreset_set_leds_and_return
 
 _turboreset_sm_exec_state_6:
-    cjne a,#6,_turboreset_do_nothing
+    cjne a,#6,_turboreset_sm_exec_state_7
     jnb RGH13_POST_7,_turboreset_sm_go_state_7     ; run as long as POST bit 7 is high
     jnb RGH13_POST_6,_turboreset_sm_go_state_5     ; state 6 waits for fall
     sjmp _turboreset_sm_common_timeout_code
@@ -322,6 +322,18 @@ _turboreset_sm_go_state_7:
     ; set LEDs red/orange/orange
     mov a,#LEDPATTERN_RED_ORANGE_ORANGE
     sjmp _turboreset_set_leds_and_return
+
+;
+; state 7 - monitor POST bit 7 and go back to state 5/6 if it rises again
+; this is mostly intended to catch POST bit 7 sometimes registering as 0 but could
+; also catch errors and force a reboot
+;
+_turboreset_sm_exec_state_7:
+    cjne a,#7,_turboreset_do_nothing
+    jnb RGH13_POST_7,_turboreset_do_nothing
+    jb RGH13_POST_6,_turboreset_sm_go_state_6
+    sjmp _turboreset_sm_go_state_5
+
 
 ; ------------------------------------------------------------------------------------
 ;
