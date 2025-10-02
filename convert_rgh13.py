@@ -43,6 +43,11 @@ def _init_argparser():
                            action='store_true',
                            help="Use EXT_PWR_ON_N method SMC for Zephyr/Falcon/Jasper")
 
+    argparser.add_argument("--chkstop",
+                           default=False,
+                           action='store_true',
+                           help="Use chkstop method SMC for Zephyr/Falcon/Jasper")
+
     argparser.add_argument("updflash",
                            nargs='?',
                            help="Path to updflash.bin (WARNING: FILE WILL BE OVERWRITTEN)")
@@ -64,6 +69,11 @@ SMC_FILEPATH_MAP = {
     'badfalcon_extpwr': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_extpwr.bin"),
     'jasper_extpwr': os.path.join("smc", "build", "rgh13_jasper_extpwr.bin"),
     'badjasper_extpwr': os.path.join("smc", "build", "rgh13_badjasper_extpwr.bin"),
+
+    'falcon_chkstop': os.path.join("smc", "build", "rgh13_jasper_for_falcon_chkstop.bin"),
+    'badfalcon_chkstop': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_chkstop.bin"),
+    'jasper_chkstop': os.path.join("smc", "build", "rgh13_jasper_chkstop.bin"),
+    'badjasper_chkstop': os.path.join("smc", "build", "rgh13_badjasper_chkstop.bin"),
 }
 
 def main():
@@ -173,10 +183,21 @@ def main():
         print(f"error: unrecognized/unsupported CB_B version (hash was: {cbb_hash})")
         return
 
-    if smctype in [ "zephyr", "falcon", "jasper" ] and \
-        ((args.tiltsw is False and args.extpwr is False) or (args.tiltsw is True and args.extpwr is True)):
-        print("error: must specify --tiltsw OR --extpwr for zephyr/falcon/jasper boards depending on your install")
-        return
+    if smctype in [ "zephyr", "falcon", "jasper" ]:
+        build_type = [ args.tiltsw, args.extpwr, args.chkstop ]
+
+        if True not in build_type or \
+           False not in build_type or \
+           len(set(build_type)) != 1:
+            print("error: must specify one of --tiltsw OR --extpwr OR --chkstop for zephyr/falcon/jasper boards depending on your install")
+            return
+        
+        if args.tiltsw is True:
+            smctype += "_tiltsw"
+        elif args.extpwr is True:
+            smctype += "_extpwr"
+        elif args.chkstop is True:
+            smctype += "_chkstop"
 
     if args.badjasper is True:
         smctype = "bad"+smctype

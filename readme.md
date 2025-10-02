@@ -59,6 +59,7 @@ Disadvantages:
 This depends on your board and method:
 
 - [EXT+3 for Xenon/Elpis](install_ext3_xenon.md)
+- [RGH1.3 for Zephyr/Falcon/Jasper, chkstop method](install_rgh13_zfj_chkstop.md) (optimal balance between jank and functional)
 - [RGH1.3 for Zephyr/Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (cleaner, but more annoying)
 - [RGH1.3 for Zephyr/Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (jankier, but easier)
 

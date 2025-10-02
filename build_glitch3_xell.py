@@ -137,6 +137,7 @@ XELL_TARGETS = {
         "cbb":       '6752'
     },
 
+
     "falcon_extpwr" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_extpwr.bin"),
@@ -165,7 +166,36 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752'
     },
-    
+
+    "falcon_chkstop" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_chkstop.bin"),
+        "output":    os.path.join("ecc","rgh13_falcon_chkstop.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772',
+    },
+    "badfalcon_chkstop" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_chkstop.bin"),
+        "output":    os.path.join("ecc","rgh13_badfalcon_chkstop.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772',
+    },
+    "jasper_chkstop" : {
+        "nandtype": NandType.NAND_16M_JASPER,
+        "smc":      os.path.join("smc","build","rgh13_jasper_chkstop.bin"),
+        "output":   os.path.join("ecc","rgh13_jasper_chkstop.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":      '6752',
+    },
+    "badjasper_chkstop": {
+        "nandtype":  NandType.NAND_16M_JASPER,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_chkstop.bin"),
+        "output":    os.path.join("ecc","rgh13_badjasper_chkstop.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '6752'
+    },
+
     "xenon" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_xenon.bin"),
