@@ -54,18 +54,26 @@ def make_patched_smc(c51asm_path:    str,
                      clean_smc_path: str,
                      asm_path:       str,
                      overlay_path:   str,
-                     output_path:    str):
+                     output_path:    str,
+                     additional_args: list | None):
     
+
+    args=[
+            '',
+            asm_path,
+            '-fB'            
+    ]
+
+    if additional_args is not None:
+        args += additional_args
+
+    args.append('-o')
+    args.append(overlay_path)
+
     # run c51asm to assemble the overlay
     result = subprocess.call(
         executable=c51asm_path,
-        args=[
-            '',
-            asm_path,
-            '-fB',
-            '-o',
-            overlay_path
-        ]
+        args=args
     )
     if result != 0:
         raise RuntimeError("c51asm FAILED.")
@@ -85,11 +93,15 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_falcon_overlay.bin",
         "output": "rgh13_falcon.bin"
     },
+
     "badfalcon_rgh13" : {
         "clean_smc_name": "falcon_clean.bin",            
-        "asm_name": "rgh13_badfalcon.s",              
+        "asm_name": "rgh13_falcon.s",              
         "overlay_name": "rgh13_badfalcon_overlay.bin",
-        "output": "rgh13_badfalcon.bin"
+        "output": "rgh13_badfalcon.bin",
+        "additional_args": [
+            '-DHARD_RESET_ON_CBA_FAIL=1'
+        ]
     },
 
     "jasper_extpwr_rgh13" : {
@@ -98,6 +110,7 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_jasper_extpwr_overlay.bin",
         "output": "rgh13_jasper_extpwr.bin"
     },
+
     "jasper_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_jasper.s",              
@@ -111,12 +124,17 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badjasper_extpwr_overlay.bin",
         "output": "rgh13_badjasper_extpwr.bin"
     },
+
     "badjasper_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_badjasper.s",              
+        "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_badjasper_overlay.bin",
-        "output": "rgh13_badjasper.bin"
+        "output": "rgh13_badjasper.bin",
+        "additional_args": [
+            '-DHARD_RESET_ON_CBA_FAIL=1'
+        ]
     },
+
     "jasper_for_falcon_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_jasper_for_falcon_extpwr.s",              
@@ -125,9 +143,12 @@ SMC_TARGETS = {
     },
     "jasper_for_falcon_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper_for_falcon.s",              
+        "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_jasper_for_falcon_overlay.bin",
-        "output": "rgh13_jasper_for_falcon.bin"
+        "output": "rgh13_jasper_for_falcon.bin",
+        "additional_args": [
+            '-DJASPER_FOR_FALCON=1'
+        ]
     },
     "badjasper_for_falcon_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
@@ -135,11 +156,16 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badjasper_for_falcon_extpwr_overlay.bin",
         "output": "rgh13_badjasper_for_falcon_extpwr.bin"
     },
+
     "badjasper_for_falcon_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_badjasper_for_falcon.s",              
+        "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_badjasper_for_falcon_overlay.bin",
-        "output": "rgh13_badjasper_for_falcon.bin"
+        "output": "rgh13_badjasper_for_falcon.bin",
+        "additional_args": [
+            '-DHARD_RESET_ON_CBA_FAIL=1',
+            '-DJASPER_FOR_FALCON=1'
+        ]
     },
 
     "xenon": {
@@ -174,8 +200,10 @@ def main():
             print(f"\tasm_path = {asm_path}")
             print(f"\toverlay_path = {overlay_path}")
             print(f"\toutput_path = {output_path}")
+            
+            additional_args = target_params["additional_args"] if "additional_args" in target_params else None
 
-            make_patched_smc(c51asm_path, clean_smc_path, asm_path, overlay_path, output_path)
+            make_patched_smc(c51asm_path, clean_smc_path, asm_path, overlay_path, output_path, additional_args)
 
     finally:
         pass
