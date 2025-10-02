@@ -27,6 +27,9 @@ endif
 ifdef POST7_EXTPWR
     RGH13_POST_7 equ gpio_ext_pwr_on_n
 endif
+ifdef POST7_CHKSTOP
+    RGH13_POST_7 equ gpio_smc_cpu_chkstop_detect
+endif
 
 ; ------------------------------------------------------------------------------------
 
@@ -90,6 +93,10 @@ endif
 
 if RGH13_POST_7=gpio_ext_pwr_on_n
     .include "rgh13_jasper_extpwr_decls.inc"
+endif
+
+if RGH13_POST_7=gpio_smc_cpu_chkstop_detect
+    .include "rgh13_jasper_chkstop_decls.inc"
 endif
 
     mov dptr,#rgh13_common_code_start
@@ -196,7 +203,9 @@ endif
 if RGH13_POST_7=gpio_ext_pwr_on_n
     .include "rgh13_jasper_extpwr_patches.s"
 endif
-
+if RGH13_POST_7=gpio_smc_cpu_chkstop_detect
+    .include "rgh13_jasper_chkstop_patches.s"
+endif
 
     .org 0x2D73
 rgh13_common_code_start:
