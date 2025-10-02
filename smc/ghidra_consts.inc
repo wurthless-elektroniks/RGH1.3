@@ -43,4 +43,5 @@ FIFLG equ 0C0h
 
 DAT_SFR_a5 equ 0A5h
 
+TR2  equ 0C8h.2
 RCLK equ 0C8h.5

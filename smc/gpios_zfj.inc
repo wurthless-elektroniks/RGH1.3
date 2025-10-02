@@ -23,5 +23,5 @@ gpio_av_mode0                           equ FIFLG.5
 gpio_av_mode1                           equ FIFLG.6
 gpio_av_mode2                           equ FIFLG.7
 
-
+gpio_smc_cpu_chkstop_detect             equ TR2
 gpio_ext_pwr_on_n                       equ RCLK

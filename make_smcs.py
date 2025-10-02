@@ -100,7 +100,8 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badfalcon_overlay.bin",
         "output": "rgh13_badfalcon.bin",
         "additional_args": [
-            '-DHARD_RESET_ON_CBA_FAIL=1'
+            '-D',
+            'HARD_RESET_ON_CBA_FAIL=1'
         ]
     },
 
@@ -131,7 +132,8 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badjasper_overlay.bin",
         "output": "rgh13_badjasper.bin",
         "additional_args": [
-            '-DHARD_RESET_ON_CBA_FAIL=1'
+            '-D',
+            'HARD_RESET_ON_CBA_FAIL=1'
         ]
     },
 
@@ -147,7 +149,8 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_jasper_for_falcon_overlay.bin",
         "output": "rgh13_jasper_for_falcon.bin",
         "additional_args": [
-            '-DJASPER_FOR_FALCON=1'
+            '-D',
+            'JASPER_FOR_FALCON=1'
         ]
     },
     "badjasper_for_falcon_extpwr_rgh13" : {
@@ -163,8 +166,10 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badjasper_for_falcon_overlay.bin",
         "output": "rgh13_badjasper_for_falcon.bin",
         "additional_args": [
-            '-DHARD_RESET_ON_CBA_FAIL=1',
-            '-DJASPER_FOR_FALCON=1'
+            '-D',
+            'HARD_RESET_ON_CBA_FAIL=1',
+            '-D',
+            'JASPER_FOR_FALCON=1'
         ]
     },
 
