@@ -126,9 +126,13 @@ SMC_TARGETS = {
 
     "badjasper_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_badjasper_extpwr.s",              
+        "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_badjasper_extpwr_overlay.bin",
-        "output": "rgh13_badjasper_extpwr.bin"
+        "output": "rgh13_badjasper_extpwr.bin",
+        "additional_args": [
+            '-D','POST7_EXTPWR=1',
+            '-D','HARD_RESET_ON_CBA_FAIL=1'
+        ]
     },
 
     "badjasper_rgh13" : {
@@ -144,10 +148,15 @@ SMC_TARGETS = {
 
     "jasper_for_falcon_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper_for_falcon_extpwr.s",              
+        "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_jasper_for_falcon_extpwr_overlay.bin",
-        "output": "rgh13_jasper_for_falcon_extpwr.bin"
+        "output": "rgh13_jasper_for_falcon_extpwr.bin",
+        "additional_args": [
+            '-D','JASPER_FOR_FALCON=1',
+            '-D','POST7_EXTPWR=1'
+        ]
     },
+
     "jasper_for_falcon_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_jasper.s",              
@@ -158,11 +167,17 @@ SMC_TARGETS = {
             '-D','POST7_TILTSW=1'
         ]
     },
+
     "badjasper_for_falcon_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_badjasper_for_falcon_extpwr.s",              
+        "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_badjasper_for_falcon_extpwr_overlay.bin",
-        "output": "rgh13_badjasper_for_falcon_extpwr.bin"
+        "output": "rgh13_badjasper_for_falcon_extpwr.bin",
+        "additional_args": [
+            '-D','HARD_RESET_ON_CBA_FAIL=1',
+            '-D','JASPER_FOR_FALCON=1',
+            '-D','POST7_EXTPWR=1'
+        ]
     },
 
     "badjasper_for_falcon_rgh13" : {
