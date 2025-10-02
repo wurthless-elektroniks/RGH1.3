@@ -20,7 +20,13 @@ endif
 
 
 RGH13_POST_6 equ gpio_gpu_reset_done
-RGH13_POST_7 equ gpio_tiltsw_n
+
+ifdef POST7_TILTSW
+    RGH13_POST_7 equ gpio_tiltsw_n
+endif
+ifdef POST7_EXTPWR
+    RGH13_POST_7 equ gpio_ext_pwr_on_n
+endif
 
 ; ------------------------------------------------------------------------------------
 
@@ -78,8 +84,13 @@ CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 35
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
 
-    mov dptr,#tiltsw_nullify_start
-    mov dptr,#tiltsw_nullify_end
+if RGH13_POST_7=gpio_tiltsw_n
+    .include "rgh13_jasper_tiltsw_decls.inc"
+endif
+
+if RGH13_POST_7=gpio_ext_pwr_on_n
+    .include "rgh13_jasper_extpwr_decls.inc"
+endif
 
     mov dptr,#rgh13_common_code_start
     mov dptr,#rgh13_common_code_end
@@ -178,12 +189,14 @@ powerup_reroute_start:
     nop ; because we overwrote two CLR opcodes
 powerup_reroute_end:
 
-    ; patch tilt switch routine so it always returns 0
-    .org 0x25FC
-tiltsw_nullify_start:
-    clr cy
-    ret
-tiltsw_nullify_end:
+
+if RGH13_POST_7=gpio_tiltsw_n
+    .include "rgh13_jasper_tiltsw_patches.s"
+endif
+if RGH13_POST_7=gpio_ext_pwr_on_n
+    .include "rgh13_jasper_extpwr_patches.s"
+endif
+
 
     .org 0x2D73
 rgh13_common_code_start:

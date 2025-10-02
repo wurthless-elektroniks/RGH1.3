@@ -100,23 +100,28 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badfalcon_overlay.bin",
         "output": "rgh13_badfalcon.bin",
         "additional_args": [
-            '-D',
-            'HARD_RESET_ON_CBA_FAIL=1'
+            '-D','HARD_RESET_ON_CBA_FAIL=1'
         ]
     },
 
     "jasper_extpwr_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper_extpwr.s",              
+        "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_jasper_extpwr_overlay.bin",
-        "output": "rgh13_jasper_extpwr.bin"
+        "output": "rgh13_jasper_extpwr.bin",
+        "additional_args": [
+            '-D','POST7_EXTPWR=1'
+        ]
     },
 
     "jasper_rgh13" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_jasper.s",              
         "overlay_name": "rgh13_jasper_overlay.bin",
-        "output": "rgh13_jasper.bin"
+        "output": "rgh13_jasper.bin",
+        "additional_args": [
+            '-D','POST7_TILTSW=1'
+        ]
     },
 
     "badjasper_extpwr_rgh13" : {
@@ -132,8 +137,8 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badjasper_overlay.bin",
         "output": "rgh13_badjasper.bin",
         "additional_args": [
-            '-D',
-            'HARD_RESET_ON_CBA_FAIL=1'
+            '-D','POST7_TILTSW=1',
+            '-D','HARD_RESET_ON_CBA_FAIL=1'
         ]
     },
 
@@ -149,8 +154,8 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_jasper_for_falcon_overlay.bin",
         "output": "rgh13_jasper_for_falcon.bin",
         "additional_args": [
-            '-D',
-            'JASPER_FOR_FALCON=1'
+            '-D','JASPER_FOR_FALCON=1',
+            '-D','POST7_TILTSW=1'
         ]
     },
     "badjasper_for_falcon_extpwr_rgh13" : {
@@ -166,10 +171,9 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_badjasper_for_falcon_overlay.bin",
         "output": "rgh13_badjasper_for_falcon.bin",
         "additional_args": [
-            '-D',
-            'HARD_RESET_ON_CBA_FAIL=1',
-            '-D',
-            'JASPER_FOR_FALCON=1'
+            '-D','HARD_RESET_ON_CBA_FAIL=1',
+            '-D','JASPER_FOR_FALCON=1',
+            '-D','POST7_TILTSW=1'
         ]
     },
 
