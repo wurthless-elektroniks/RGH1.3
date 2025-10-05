@@ -25,3 +25,5 @@ gpio_av_mode2                           equ FIFLG.7
 
 gpio_smc_cpu_chkstop_detect             equ TR2
 gpio_ext_pwr_on_n                       equ RCLK
+
+gpioddr_port3 equ DAT_SFR_a5

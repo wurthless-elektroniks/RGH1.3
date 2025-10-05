@@ -51,7 +51,7 @@ Benefits over RGH3:
 - No possibility of SMC hangs causing the system to power off during the boot
 
 Disadvantages:
-- Requires a trace cut (or removal of the tilt switch) and two diodes
+- Requires two diodes and occasional bodges/trace cuts
 - See "Known improvements" below for more information
 
 ## Wiring everything up
@@ -59,9 +59,9 @@ Disadvantages:
 This depends on your board and method:
 
 - [EXT+3 for Xenon/Elpis](install_ext3_xenon.md)
-- [RGH1.3 for Zephyr/Falcon/Jasper, chkstop method](install_rgh13_zfj_chkstop.md) (optimal balance between jank and functional)
-- [RGH1.3 for Zephyr/Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (cleaner, but more annoying)
-- [RGH1.3 for Zephyr/Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (jankier, but easier)
+- [RGH1.3 for Falcon/Jasper, chkstop method](install_rgh13_zfj_chkstop.md) (optimal balance between jank and functional)
+- [RGH1.3 for Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (cleaner, but more annoying)
+- [RGH1.3 for Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (jankier, but easier)
 
 ## Flashing XeLL
 
@@ -133,13 +133,12 @@ the buildscript will use the same SMC regardless.
 
 Once your image is built and converted to RGH3, **don't flash it immediately**. You need to write some crap on the commandline.
 
-**If you used the recommended timeouts above:**
+For Xenon it's simple: `python3 convert_rgh3.py --board xenon path/to/updflash.bin`
 
-`python3 convert_rgh13.py path/to/updflash.bin`
-
-**If you used badjasper:**
-
-- `python3 convert_rgh13.py path/to/updflash.bin --badjasper`
+For Falcon and Jasper, you will need to add more arguments depending on which method you used and whether you needed a badjasper SMC.
+Examples are:
+- `python3 convert_rgh3.py --board falcon --chkstop path/to/updflash.bin`
+- `python3 convert_rgh3.py --board jasper --chkstop --badjasper path/to/updflash.bin`
 
 If you get the message
 
