@@ -107,6 +107,15 @@ def _permutate_zfj_targets(gpio_name: str) -> dict:
     # For now, use Jasper-on-Falcon SMCs for Falcon targets
     # See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
     return {
+        # Xenon loaders can boot 8-chip Falcons very quickly so this is provided for such a case
+        f"falcon_{gpio_name}_1940" : {
+            "nandtype":  NandType.NAND_16M,
+            "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
+            "output":    os.path.join("ecc",f"rgh13_falcon_{gpio_name}_1940.ecc"),
+            "imagetype": ImageType.GLITCH3,
+            "cbb":       '1940',
+        },
+
         f"falcon_{gpio_name}" : {
             "nandtype":  NandType.NAND_16M,
             "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
@@ -142,6 +151,13 @@ XELL_TARGETS = {
     # FIXME: there is a bug in the Falcon SMC code that results in the board playing blind
     # For now, use Jasper-on-Falcon SMCs for Falcon targets
     # See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
+    "falcon_tiltsw_1940" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon.bin"),
+        "output":    os.path.join("ecc","rgh13_falcon_tiltsw_1940.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '1940',
+    },
     "falcon_tiltsw" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon.bin"),
