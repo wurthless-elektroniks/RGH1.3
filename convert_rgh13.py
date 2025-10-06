@@ -186,17 +186,18 @@ def main():
     if smctype in [ "zephyr", "falcon", "jasper" ]:
         build_type = [ args.tiltsw, args.extpwr, args.chkstop ]
 
-        if True not in build_type or \
-           False not in build_type or \
-           len(set(build_type)) != 1:
+        if True not in build_type:
             print("error: must specify one of --tiltsw OR --extpwr OR --chkstop for zephyr/falcon/jasper boards depending on your install")
             return
         
         if args.tiltsw is True:
+            print("using tiltswitch smc")
             smctype += "_tiltsw"
         elif args.extpwr is True:
+            print("using extpwr smc")
             smctype += "_extpwr"
         elif args.chkstop is True:
+            print("using chkstop smc")
             smctype += "_chkstop"
 
     if args.badjasper is True:
