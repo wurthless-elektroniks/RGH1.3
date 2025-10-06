@@ -207,11 +207,6 @@ def main():
             return
         
         print("badjasper mode enabled!")
-    
-    if args.tiltsw is True:
-        smctype += "_tiltsw"
-    elif args.extpwr is True:
-        smctype += "_extpwr"
 
     smcpath = SMC_FILEPATH_MAP[smctype]
     print(f"attempting to read SMC from: {smcpath}")
