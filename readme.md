@@ -122,7 +122,6 @@ and shut down. Press Eject and Sync as usual to get the error codes. The RGH1.3 
 - 3333: POST bits 6 and 7 were not low coming out of CPU reset. Diodes are missing or wired incorrectly.
   Also check that you've disabled the tilt switch. **If you are using the capacitor and you get this error
   code, there is too much noise on the PLL wire.**
-- 0000 (displays as 4444): CPU did not make it to CB_A in time. CPU might be dying or you wired something wrong.
 
 ## Creating your updflash.bin
 

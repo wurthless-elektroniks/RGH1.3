@@ -158,7 +158,7 @@ turboreset_sm_exec:
     mov a,@r0
 
 ;
-; state 1 - wait for POST bits 6 and 7 to rise, and throw RRoD if they don't do so in time
+; state 1 - wait for POST bits 6 and 7 to rise
 ;
     cjne a,#1,_turboreset_sm_exec_state_2
     jnb RGH13_POST_6,_turboreset_sm_state_1_timeout
@@ -180,9 +180,11 @@ _turboreset_sm_state_1_timeout:
     dec @r0
     cjne @r0,#0,_turboreset_do_nothing
 
-    ; on timeout, raise RRoD 0000 (displays as 4444) and give up
-    mov g_rrod_errorcode_1,#0x00
-    mov g_rrod_errorcode_2,#0x00
+    ; old behavior here was to RRoD 0000/4444
+    ; however POST bus noise and other things caused false positives.
+    ; if the CPU is stuck in a coma, just reboot the whole thing...
+    ljmp hard_reset
+
 _setup_rrod:
     mov g_rrod_set_zero,#0
     mov g_rrod_base_error_pattern,#LED_ERROR_PATTERN
