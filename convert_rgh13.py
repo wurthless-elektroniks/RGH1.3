@@ -28,6 +28,11 @@ def _init_argparser():
     argparser.add_argument("--board",
                            help="Specifies target board (xenon, zephyr, falcon, jasper). Required for some CB_B versions.")
 
+    argparser.add_argument("--fast5050",
+                           default=False,
+                           action='store_true',
+                           help="Enable fast SDRAM training patch for supported CB_Bs (boots Falcons faster)")
+    
     argparser.add_argument("--badjasper",
                            default=False,
                            action='store_true',
@@ -227,6 +232,19 @@ def main():
 
     # inject appropriate hacked CB_B
     cbb_patched = rgh13cbb_do_patches(cbb)
+
+    if args.fast5050:
+        training_step_default = bytes([0x01, 0x01, 0x01, 0x01])
+        training_step_fast    = bytes([0x04, 0x04, 0x04, 0x04])
+        if cbb_patched[0x46B0:0x46B4] == training_step_default and \
+            cbb_patched[0x4A2C:0x4A30] == training_step_default:
+            
+            cbb_patched[0x46B0:0x46B4] = training_step_fast
+            cbb_patched[0x4A2C:0x4A30] = training_step_fast
+            print("fast5050: applied 5772 patches")
+        else:
+            print("fast5050: CB_B unrecognized, no patches applied.")
+
     nand_stripped[next_cb_addr:next_cb_addr+cbb_size] = cbb_patched
     print("patched CB_B")
     
