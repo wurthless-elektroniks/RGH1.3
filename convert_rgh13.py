@@ -242,6 +242,12 @@ def main():
             cbb_patched[0x46B0:0x46B4] = training_step_fast
             cbb_patched[0x4A2C:0x4A30] = training_step_fast
             print("fast5050: applied 5772 patches")
+        elif cbb_patched[0x4e54:0x4e58] == training_step_default and \
+            cbb_patched[0x51d0:0x51d4] == training_step_default:
+            
+            cbb_patched[0x4e54:0x4e58] = training_step_fast
+            cbb_patched[0x51d0:0x51d4] = training_step_fast
+            print("fast5050: applied 6752 patches")
         else:
             print("fast5050: CB_B unrecognized, no patches applied.")
 
