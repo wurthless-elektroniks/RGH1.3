@@ -460,9 +460,9 @@ led_lightshow_sm_exec:
 _led_lightshow_sm_do_state_1:
     ; for all "active" states:
     ; cut the state machine off if RRoD raised
-    jb g_force_rrod_3,_led_lightshow_sm_rrod_raised
-    jb g_force_rrod_4,_led_lightshow_sm_rrod_raised
-    jb g_force_rrod_ipc,_led_lightshow_sm_rrod_raised
+    jb g_force_rrod_3,_led_lightshow_sm_clear_leds_and_go_idle
+    jb g_force_rrod_4,_led_lightshow_sm_clear_leds_and_go_idle
+    jb g_force_rrod_ipc,_led_lightshow_sm_clear_leds_and_go_idle
 
     mov r0,#g_ledlightshow_watchdog_state
     mov a,@r0
@@ -501,8 +501,7 @@ ipc_led_anim_has_arrived:
     jnc led_lightshow_sm_do_nothing
 
     ; it has, so clear our LED state and let the ring of light run normally
-    mov a,#0
-    acall rol_set_leds
+    sjmp _led_lightshow_sm_clear_leds_and_go_idle
 
     ; other IPC hook lands here
 ipc_displayerror_has_arrived:
@@ -511,7 +510,7 @@ ipc_displayerror_has_arrived:
     mov g_rrod_errorcode_1,r2
     mov g_rrod_errorcode_2,r3
 
-_led_lightshow_sm_rrod_raised:
+_led_lightshow_sm_clear_leds_and_go_idle:
     ; if any RRoD raised, clear LED state
     mov a,#0
     acall rol_set_leds
@@ -520,7 +519,6 @@ _led_lightshow_sm_go_idle:
     mov r0,#g_ledlightshow_watchdog_state
     mov @r0,#0
     ret
-
 
 ;
 ; Common function to set Ring of Light LEDs
