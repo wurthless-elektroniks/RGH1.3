@@ -33,6 +33,11 @@ def _init_argparser():
                            action='store_true',
                            help="Enable fast SDRAM training patch for supported CB_Bs (boots Falcons faster)")
     
+    argparser.add_argument("--veryfast5050",
+                           default=False,
+                           action='store_true',
+                           help="Enable very fast SDRAM training patch for supported CB_Bs (might be unstable)")
+    
     argparser.add_argument("--badjasper",
                            default=False,
                            action='store_true',
@@ -233,9 +238,9 @@ def main():
     # inject appropriate hacked CB_B
     cbb_patched = rgh13cbb_do_patches(cbb)
 
-    if args.fast5050:
+    if args.fast5050 or args.veryfast5050:
         training_step_default = bytes([0x01, 0x01, 0x01, 0x01])
-        training_step_fast    = bytes([0x04, 0x04, 0x04, 0x04])
+        training_step_fast    = bytes([0x10, 0x10, 0x10, 0x10]) if args.veryfast5050 else bytes([0x04, 0x04, 0x04, 0x04])
         if cbb_patched[0x46B0:0x46B4] == training_step_default and \
             cbb_patched[0x4A2C:0x4A30] == training_step_default:
             
