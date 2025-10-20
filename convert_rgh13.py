@@ -63,6 +63,12 @@ def _init_argparser():
                            action='store_true',
                            help="Use one-wire POST method")
 
+
+    argparser.add_argument("--zerowire",
+                           default=False,
+                           action='store_true',
+                           help="Use zero-wire POST method")
+    
     argparser.add_argument("updflash",
                            nargs='?',
                            help="Path to updflash.bin (WARNING: FILE WILL BE OVERWRITTEN)")
@@ -90,7 +96,11 @@ SMC_FILEPATH_MAP = {
     'jasper_chkstop': os.path.join("smc", "build", "rgh13_jasper_chkstop.bin"),
     'badjasper_chkstop': os.path.join("smc", "build", "rgh13_badjasper_chkstop.bin"),
 
-    'falcon_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin")
+    'falcon_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin"),
+    'jasper_1wire': os.path.join("smc", "build", "rgh13_jasper_1wire.bin"),
+    
+    'falcon_0wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_0wire.bin"),
+    'jasper_0wire': os.path.join("smc", "build", "rgh13_jasper_0wire.bin"),
 }
 
 def main():
@@ -202,6 +212,8 @@ def main():
 
     if args.onewire:
         smctype += "_1wire"
+    elif args.zerowire:
+        smctype += "_0wire"
     elif smctype in [ "zephyr", "falcon", "jasper" ]:
         build_type = [ args.tiltsw, args.extpwr, args.chkstop, ]
 
