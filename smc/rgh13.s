@@ -46,12 +46,6 @@ endif
 ; this can loop over and over, the main reset watchdog will reboot if HWINIT takes too long.
 ; note the behavior is console-dependent.
 
-; once GetPowerUpCause arrives the CPU has this amount of time to make it to the LED bootanim
-; or else we will reboot. this is a workaround for some systems that crash late in the boot,
-; primarily jaspers, but falcons are known to do this too.
-; default value is 125 * 20 * 2 = 5000 ms, adjust as necessary
-LED_LIGHTSHOW_SM_TIMEOUT_TICKS equ 125
-
 ; RRoD Classic, but orange so we don't confuse it with a normal system error
 LED_ERROR_PATTERN equ 0b11011101
 

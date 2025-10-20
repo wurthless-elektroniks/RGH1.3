@@ -189,7 +189,24 @@ SMC_TARGETS = {
         "asm_name": "rgh13_xenon.s",
         "overlay_name": "rgh13_xenon_overlay.bin",
         "output": "rgh13_xenon.bin"
-    }
+    },
+
+    "jasper_for_falcon_rgh13_1wire" : {
+        "clean_smc_name": "jasper_clean.bin",            
+        "asm_name": "rgh13_1wire_jasper.s",              
+        "overlay_name": "rgh13_jasper_for_falcon_1wire_overlay.bin",
+        "output": "rgh13_jasper_for_falcon_1wire.bin",
+        "additional_args": [
+            '-D','JASPER_FOR_FALCON=1'
+        ]
+    },
+
+    "jasper_rgh13_1wire" : {
+        "clean_smc_name": "jasper_clean.bin",            
+        "asm_name": "rgh13_1wire_jasper.s",              
+        "overlay_name": "rgh13_jasper_1wire_overlay.bin",
+        "output": "rgh13_jasper_1wire.bin",
+    },
 }
 
 #SMC_TARGETS.update(_permutate_jasper_targets("tiltsw",['-D','POST7_TILTSW=1']))

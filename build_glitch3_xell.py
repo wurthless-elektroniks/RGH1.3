@@ -202,6 +202,22 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752'
     },
+    
+    "falcon_1wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_falcon_1wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772_ipc',
+    },
+
+    "jasper_1wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_jasper_1wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '6752_ipc',
+    },
 
     "xenon" : {
         "nandtype":  NandType.NAND_16M,
@@ -269,19 +285,29 @@ def main():
     cbb_7378 = load_or_die(os.path.join("cbb","cbb_7378_clean.bin"))
     cbb_7378 = xell7378_do_patches(cbb_7378)
 
-
     # rgh13cbb_do_patches() autodetects which patches to apply then applies them
-    cbb_1940 = rgh13cbb_do_patches(cbb_1940)
-    cbb_5772 = rgh13cbb_do_patches(cbb_5772)
-    cbb_6752 = rgh13cbb_do_patches(cbb_6752)
-    cbb_7378 = rgh13cbb_do_patches(cbb_7378)
+    cbb_1940_ipc = rgh13cbb_do_patches(bytearray(cbb_1940), use_smc_ipc=True)
+    cbb_5772_ipc = rgh13cbb_do_patches(bytearray(cbb_5772), use_smc_ipc=True)
+    cbb_6752_ipc = rgh13cbb_do_patches(bytearray(cbb_6752), use_smc_ipc=True)
+    cbb_7378_ipc = rgh13cbb_do_patches(bytearray(cbb_7378), use_smc_ipc=True)
+    cbb_1940     = rgh13cbb_do_patches(cbb_1940, use_smc_ipc=False)
+    cbb_5772     = rgh13cbb_do_patches(cbb_5772, use_smc_ipc=False)
+    cbb_6752     = rgh13cbb_do_patches(cbb_6752, use_smc_ipc=False)
+    cbb_7378     = rgh13cbb_do_patches(cbb_7378, use_smc_ipc=False)
+
 
     cbbs = {
-        '1940': cbb_1940,
+        '1940':     cbb_1940,
+        '1940_ipc': cbb_1940_ipc,
+
         '5666': load_or_die(os.path.join("cbb","cbb_5666_xell.bin")),
-        '5772': cbb_5772,
-        '6752': cbb_6752,
-        '7378': cbb_7378
+
+        '5772':     cbb_5772,
+        '5772_ipc': cbb_5772_ipc,
+        '6752':     cbb_6752,
+        '6752_ipc': cbb_6752_ipc,
+        '7378':     cbb_7378,
+        '7378_ipc': cbb_7378_ipc,
     }
 
     try:

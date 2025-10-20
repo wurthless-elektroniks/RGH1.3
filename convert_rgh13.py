@@ -58,6 +58,11 @@ def _init_argparser():
                            action='store_true',
                            help="Use chkstop method SMC for Zephyr/Falcon/Jasper")
 
+    argparser.add_argument("--onewire",
+                           default=False,
+                           action='store_true',
+                           help="Use one-wire POST method")
+
     argparser.add_argument("updflash",
                            nargs='?',
                            help="Path to updflash.bin (WARNING: FILE WILL BE OVERWRITTEN)")
@@ -84,6 +89,8 @@ SMC_FILEPATH_MAP = {
     'badfalcon_chkstop': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_chkstop.bin"),
     'jasper_chkstop': os.path.join("smc", "build", "rgh13_jasper_chkstop.bin"),
     'badjasper_chkstop': os.path.join("smc", "build", "rgh13_badjasper_chkstop.bin"),
+
+    'falcon_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin")
 }
 
 def main():
@@ -193,8 +200,10 @@ def main():
         print(f"error: unrecognized/unsupported CB_B version (hash was: {cbb_hash})")
         return
 
-    if smctype in [ "zephyr", "falcon", "jasper" ]:
-        build_type = [ args.tiltsw, args.extpwr, args.chkstop ]
+    if args.onewire:
+        smctype += "_1wire"
+    elif smctype in [ "zephyr", "falcon", "jasper" ]:
+        build_type = [ args.tiltsw, args.extpwr, args.chkstop, ]
 
         if True not in build_type:
             print("error: must specify one of --tiltsw OR --extpwr OR --chkstop for zephyr/falcon/jasper boards depending on your install")
@@ -236,7 +245,7 @@ def main():
     print("injected new SMC program")
 
     # inject appropriate hacked CB_B
-    cbb_patched = rgh13cbb_do_patches(cbb)
+    cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire)
 
     if args.fast5050 or args.veryfast5050:
         training_step_default = bytes([0x01, 0x01, 0x01, 0x01])
