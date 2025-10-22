@@ -223,6 +223,26 @@ SMC_TARGETS = {
         "overlay_name": "rgh13_jasper_0wire_overlay.bin",
         "output": "rgh13_jasper_0wire.bin",
     },
+
+    "badjasper_for_falcon_rgh13_0wire" : {
+        "clean_smc_name": "jasper_clean.bin",            
+        "asm_name": "rgh13_0wire_jasper.s",              
+        "overlay_name": "rgh13_badjasper_for_falcon_0wire_overlay.bin",
+        "output": "rgh13_badjasper_for_falcon_0wire.bin",
+        "additional_args": [
+            '-D','JASPER_FOR_FALCON=1',
+            '-D','HARD_RESET_ON_CBA_FAIL=1',
+        ]
+    },
+    "badjasper_rgh13_0wire" : {
+        "clean_smc_name": "jasper_clean.bin",            
+        "asm_name": "rgh13_0wire_jasper.s",              
+        "overlay_name": "rgh13_badjasper_0wire_overlay.bin",
+        "output": "rgh13_badjasper_0wire.bin",
+        "additional_args": [
+            '-D','HARD_RESET_ON_CBA_FAIL=1',
+        ]
+    },
 }
 
 #SMC_TARGETS.update(_permutate_jasper_targets("tiltsw",['-D','POST7_TILTSW=1']))

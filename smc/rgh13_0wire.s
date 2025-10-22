@@ -11,7 +11,7 @@ LED_ERROR_PATTERN equ 0b11011101
 ;
 ; ------------------------------------------------------------------------------------
 
-RED_BLINK_DELAY equ 20  
+RED_BLINK_DELAY equ 20  ; not actual CB_A start timing
 IPC_A0_TIMEOUT  equ 20  ; 
 IPC_A1_TIMEOUT  equ 4   ; 4 x 20 = 80 ms to get to cbb_jump
 IPC_12_TIMEOUT  equ 22  ; 22 x 20 = 
@@ -95,18 +95,18 @@ _turboreset_sm_exec_state_2:
 
     ; no way to exit this state except through SMC callback
 
-    ; tick timer down
-_turboreset_common_timeout:
     mov r0,#g_turboreset_sm_counter
     dec @r0
     cjne @r0,#0,_turboreset_do_nothing
-    
-    ; we've timed out - call common disarm code below instead of repeating it
     acall _turboreset_sm_disarm
 
-    ; and go reboot
-_turboreset_reboot_via_sysreset_watchdog:
-    ljmp msftsmc_sysreset_watchdog_exec_state_10
+    ; for badjaspers, hard reset always
+    ; (not receiving 0xA0 means a crash happened before CB_X)
+ifdef HARD_RESET_ON_CBA_FAIL
+    sjmp hard_reset
+else
+    sjmp _turboreset_reboot_via_sysreset_watchdog
+endif
 
 ;
 ; state 3 - wait for IPC command 0xA1
@@ -122,8 +122,19 @@ _turboreset_sm_exec_state_3:
 _turboreset_sm_exec_state_4:
     cjne a,#4,_turboreset_sm_exec_state_5
     ; no way to exit this state except through SMC callback
-    sjmp _turboreset_common_timeout    
 
+    ; tick timer down
+_turboreset_common_timeout:
+    mov r0,#g_turboreset_sm_counter
+    dec @r0
+    cjne @r0,#0,_turboreset_do_nothing
+    
+    ; we've timed out - call common disarm code below instead of repeating it
+    acall _turboreset_sm_disarm
+
+    ; and go reboot
+_turboreset_reboot_via_sysreset_watchdog:
+    ljmp msftsmc_sysreset_watchdog_exec_state_10
 ;
 ; state 5 - wait for some SMC commands (0xA2, 0xE2, 0xA4)
 ;

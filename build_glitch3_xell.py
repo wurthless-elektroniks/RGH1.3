@@ -219,6 +219,14 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772_ipc',
         "cbx":       'cby'
+    },     
+    "badfalcon_0wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_0wire.bin"),
+        "output":    os.path.join("ecc","rgh13_badfalcon_0wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772_ipc',
+        "cbx":       'cby'
     },
 
     "jasper_1wire" : {
@@ -234,6 +242,14 @@ XELL_TARGETS = {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_0wire.bin"),
         "output":    os.path.join("ecc","rgh13_jasper_0wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '6752_ipc',
+        "cbx":       'cby'
+    },
+    "badjasper_0wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_0wire.bin"),
+        "output":    os.path.join("ecc","rgh13_badjasper_0wire.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752_ipc',
         "cbx":       'cby'

@@ -105,6 +105,9 @@ SMC_FILEPATH_MAP = {
 
     'falcon_0wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_0wire.bin"),
     'jasper_0wire': os.path.join("smc", "build", "rgh13_jasper_0wire.bin"),
+
+    'badfalcon_0wire': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_0wire.bin"),
+    'badjasper_0wire': os.path.join("smc", "build", "rgh13_badjasper_0wire.bin"),
 }
 
 def encrypt_cba(cba, rnd = "CB_ACB_ACB_ACB_A"):
