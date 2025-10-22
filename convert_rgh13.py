@@ -300,6 +300,10 @@ def main():
     if len(new_cbx) != 0x400:
         print("error: CB_X/CB_Y was not 0x400 bytes")
 
+    if cbx_file == "cbx_xell.bin":
+        new_cbx[0x3C0:0x3C4] = bytes([0x7F, 0xE4, 0xFB, 0x78]) # mov r4,r31 (avoid r31 being trashed by cbb_jump)
+        new_cbx, _ = assemble_branch(new_cbx, 0x3C4, 0x478) # jump to CB_A cbb_jump function
+
     cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed)
 
     nand_stripped[cb_inject_pos:cb_inject_pos+len(cby_encrypted)] = cby_encrypted
