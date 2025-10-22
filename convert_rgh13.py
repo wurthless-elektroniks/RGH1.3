@@ -2,6 +2,7 @@ import sys
 import struct
 import hashlib
 import hmac
+import re
 from argparse import ArgumentParser,RawTextHelpFormatter
 from enum import Enum
 from smc import encrypt_smc
@@ -24,6 +25,13 @@ SHA1_CBB_6752_XEBUILD = "899cd01e00ef7b27ceb010dde42e4d6e9c871330"
 # TODO: calc hash of patched elpiss 7378 now that jrunner is supporting it
 SHA1_CBB_7378_ELPISS  = ""
 
+
+def _parse_cpukey(cpu_key):
+    CPUKEY_EXP = re.compile(r"^[0-9a-fA-F]{32}$")
+    if CPUKEY_EXP.match(cpu_key) is None:
+        raise RuntimeError("error: invalid CPU key format")
+    return bytes.fromhex(cpu_key)
+
 def _init_argparser():
     argparser = ArgumentParser(formatter_class=RawTextHelpFormatter,
                                prog='convert_rgh13',
@@ -32,6 +40,10 @@ def _init_argparser():
     argparser.add_argument("--board",
                            help="Specifies target board (xenon, zephyr, falcon, jasper). Required for some CB_B versions.")
 
+    argparser.add_argument("--cpukey",
+                           type=_parse_cpukey,
+                           help="Specify CPU key, required to run older dashboards")
+    
     argparser.add_argument("--fast5050",
                            default=False,
                            action='store_true',
@@ -118,7 +130,6 @@ def encrypt_cba(cba, rnd = "CB_ACB_ACB_ACB_A"):
 def encrypt_cbb(cbb, cba_key, rnd=b"CB_BCB_BCB_BCB_B", cpu_key=b"\x00"*16):
     key = hmac.new(cba_key, rnd + cpu_key, hashlib.sha1).digest()[0:0x10]
     return cbb[0:0x10] + rnd + RC4(key).crypt(cbb[0x20:])
-
 
 def main():
     argparser = _init_argparser()
@@ -273,7 +284,9 @@ def main():
 
     # replace whatever CB_A is there with the 9188 MFG image
     new_cba = None
-    with open(os.path.join("cba", "cba_9188_mfg.bin"), "rb") as f:
+
+    cba_file = "cba_9188_mfg.bin" if args.cpukey is None else "cba_5772.bin"
+    with open(os.path.join("cba", cba_file), "rb") as f:
         new_cba = f.read()
     if len(new_cba) > cba_size:
         print("error: replacement CB_A somehow larger than the original")
@@ -304,7 +317,10 @@ def main():
         new_cbx[0x3C0:0x3C4] = bytes([0x7F, 0xE4, 0xFB, 0x78]) # mov r4,r31 (avoid r31 being trashed by cbb_jump)
         new_cbx, _ = assemble_branch(new_cbx, 0x3C4, 0x478) # jump to CB_A cbb_jump function
 
-    cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed)
+    if args.cpukey is None:
+        cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed)
+    else:
+        cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed, cpu_key=args.cpukey)
 
     nand_stripped[cb_inject_pos:cb_inject_pos+len(cby_encrypted)] = cby_encrypted
     cb_inject_pos += len(cby_encrypted)
