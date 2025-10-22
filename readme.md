@@ -58,10 +58,27 @@ Disadvantages:
 
 This depends on your board and method:
 
+### Two-wire POST methods
+
+The two-wire POST methods are the oldest and probably the fastest. The code relies entirely on monitoring boot progress
+via the POST pins, and as such they require two POST diodes and occasionally some bodges.
+
 - [EXT+3 for Xenon/Elpis](install_ext3_xenon.md)
 - [RGH1.3 for Falcon/Jasper, chkstop method](install_rgh13_zfj_chkstop.md) (optimal balance between jank and functional)
 - [RGH1.3 for Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (cleaner, but more annoying)
 - [RGH1.3 for Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (jankier, but easier)
+
+### Zero-wire POST method
+
+The zero-wire POST method was created for people who are converting their consoles from RGH1.3 or EXT_CLK but don't want
+to bust out the soldering iron to add more wires (although you probably should anyway in case of a bad flash). It relies
+entirely on CPU to SMC communication to track boot progress, so it is a bit slower than the two-wire or one-wire POST methods. 
+
+Wiring is exactly the same as RGH1.2 and EXT_CLK so it will not be repeated here.
+
+### One-wire POST method
+
+In progress, to be documented when it's done.
 
 ## Flashing XeLL
 
@@ -145,29 +162,27 @@ If you get the message
 
 then your updflash.bin is ready for flashing. Flash that sucker, test your console, tweak glitch chip timings as necessary, and enjoy.
 
+## Speeding up boot times
+
+Microsoft's stock CB_B code is very slow when running SDRAM training, especially on Falcon loaders, but it is possible
+to patch it to run much faster at the risk of unstable system behavior.
+
+To use these patches, pass one of the following to `convert_rgh13.py`:
+
+- `--fast5050` seems to be a good compromise between speed and stability. I'm able to play a game for about an hour
+  with this patch.
+- `--veryfast5050` is a bit more risky, but you can still run games and the dash with no complaints, and it is super
+  fast.
+
 ## Running older kernels
 
-The RGH3 loader chain breaks support for older kernels (Blades and Kinect being the most obvious). As such, a script called `g3fix.py`
-is provided that will fix these issues and allow them to boot.
+The 9188 MFG CB_A and a bug in CB_X break support for older kernels (Blades and Kinect being the most obvious).
+If you want to run an older kernel, you'll need to specify your CPU key when running `convert_rgh13.py`. This will
+replace the manufacturing CB_A with a retail CB_A and allow any kernel to run.
 
-**As this script replaces the manufacturing loader with a retail CB_A, you'll need your CPU key for this step.** You will probably also
-need to install PyCryptodome for the script to even work.
-
-Run it as follows:
-
-`python3 g3fix.py <your-cpu-key> path/to/updflash.bin`
-
-Your output should look something like:
-
+Example usage:
 ```
-found Jasper-style 16m NAND
-CB_A replaced
-CB_X replaced
-CB_B 6752: skipping SMC HMAC panic
-CB_B padded
-recalculating ECC data...
-writing final NAND...
-dunzo
+python3 convert_rgh13.py --board falcon --zerowire --veryfast5050 --cpukey ...your cpu key... updflash.bin
 ```
 
 See [this issue](https://github.com/wurthless-elektroniks/RGH1.3/issues/2) for technical documentation of the bug.
