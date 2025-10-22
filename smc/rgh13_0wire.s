@@ -11,9 +11,10 @@ LED_ERROR_PATTERN equ 0b11011101
 ;
 ; ------------------------------------------------------------------------------------
 
-; amount of time to wait for SMC command 0x12 after reboot
-; default is 20 * 70 = 1400 ms
-IPC_12_TIMEOUT equ 70
+RED_BLINK_DELAY equ 20  
+IPC_A0_TIMEOUT  equ 20  ; 
+IPC_A1_TIMEOUT  equ 4   ; 4 x 20 = 80 ms to get to cbb_jump
+IPC_12_TIMEOUT  equ 22  ; 22 x 20 = 
 IPC_A2_E2_TOGGLE_TIMEOUT equ 35
 
 ; ------------------------------------------------------------------------------------
@@ -38,8 +39,8 @@ on_reset_watchdog_timeout:
 on_reset_watchdog_deassert_cpu_reset:
     mov r0,#g_turboreset_sm_state   ; enable statemachine
     mov @r0,#1
-    mov r0,#g_turboreset_sm_counter ; with IPC timeout
-    mov @r0,#IPC_12_TIMEOUT
+    mov r0,#g_turboreset_sm_counter
+    mov @r0,#RED_BLINK_DELAY
 
     ; clear LEDs, they'll have been left on from previous (failed) attempts
     mov a,#0
@@ -68,10 +69,29 @@ turboreset_sm_exec:
     mov a,@r0
 
 ;
-; state 1 - wait for IPC command 0x12
+; state 1 - wait a bit, then turn on the red LED
 ;
-_turboreset_sm_exec_state_1:
-    cjne a,#1,_turboreset_sm_exec_state_4
+    cjne a,#1,_turboreset_sm_exec_state_2
+
+    mov r0,#g_turboreset_sm_counter
+    dec @r0
+    cjne @r0,#0,_turboreset_do_nothing
+
+    ; go to state 2 on timeout
+    mov r0,#g_turboreset_sm_state
+    mov @r0,#2
+
+    mov r0,#g_turboreset_sm_counter
+    mov @r0,#IPC_A0_TIMEOUT
+
+    mov a,#LEDPATTERN_RED
+    sjmp _turboreset_set_leds_and_return
+
+;
+; state 2 - wait for IPC command 0xA0
+;
+_turboreset_sm_exec_state_2:
+    cjne a,#2,_turboreset_sm_exec_state_3
 
     ; no way to exit this state except through SMC callback
 
@@ -89,10 +109,26 @@ _turboreset_reboot_via_sysreset_watchdog:
     ljmp msftsmc_sysreset_watchdog_exec_state_10
 
 ;
-; state 4 - wait for some SMC commands (0xA2, 0xE2, 0xA4)
+; state 3 - wait for IPC command 0xA1
+;
+_turboreset_sm_exec_state_3:
+    cjne a,#3,_turboreset_sm_exec_state_4
+    ; no way to exit this state except through SMC callback
+    sjmp _turboreset_common_timeout    
+
+;
+; state 4 - wait for IPC command 0x12
 ;
 _turboreset_sm_exec_state_4:
-    cjne a,#4,_turboreset_do_nothing
+    cjne a,#4,_turboreset_sm_exec_state_5
+    ; no way to exit this state except through SMC callback
+    sjmp _turboreset_common_timeout    
+
+;
+; state 5 - wait for some SMC commands (0xA2, 0xE2, 0xA4)
+;
+_turboreset_sm_exec_state_5:
+    cjne a,#6,_turboreset_do_nothing
 
     ; no way to exit this state except through SMC callback
     sjmp _turboreset_common_timeout
@@ -108,11 +144,11 @@ ipc_command_12_received_reroute:
     ; we overwrote a lcall to somewhere, so restore it.
     lcall msftsmc_ipc_write_outbox_fifo
     
-    ; only act on this if turboreset in state 3
+    ; only act on this if turboreset in state 4
     mov r0,#g_turboreset_sm_state
-    cjne @r0,#1,_turboreset_do_nothing
-_turboreset_sm_go_state_4:
-    mov @r0,#4
+    cjne @r0,#4,_turboreset_do_nothing
+_turboreset_sm_go_state_5:
+    mov @r0,#5
     
     mov r0,#g_turboreset_sm_counter
     mov @r0,#IPC_A2_E2_TOGGLE_TIMEOUT
@@ -121,11 +157,11 @@ _turboreset_sm_go_state_4:
 _turboreset_set_leds_and_return:
     ljmp rol_set_leds
 
-ipc_command_bit7_received_reroute:
-    ; only act on this if turboreset in state 4
-    mov r0,#g_turboreset_sm_state
-    cjne @r0,#4,_continue_handling_bit7_command
 
+
+ipc_command_bit7_received_reroute:
+    mov r0,#g_turboreset_sm_state
+    cjne @r0,#5,_bit7_maybe_in_state_2 ; A2/E2/A4 only in state 5
 _handle_bit7_command:
     cjne a,#0xA2,_check_e2
 
@@ -145,8 +181,35 @@ _check_a4:
     cjne a,#0xA4,_continue_handling_bit7_command
 
     mov r0,#g_turboreset_sm_state
-    mov @r0,#5
+    mov @r0,#6
     mov a,#LEDPATTERN_RED_ORANGE_ORANGE
+    sjmp _turboreset_set_leds_and_return
+
+_bit7_maybe_in_state_2:
+    cjne @r0,#2,_bit7_maybe_in_state_3
+    cjne a,#0xA0,_continue_handling_bit7_command ; A0 only in state 2
+
+    ; command 0xA0 received
+    mov r0,#g_turboreset_sm_state
+    mov @r0,#3
+
+    mov r0,#g_turboreset_sm_counter
+    mov @r0,#IPC_A1_TIMEOUT
+
+    mov a,#LEDPATTERN_RED_RED
+    sjmp _turboreset_set_leds_and_return
+
+_bit7_maybe_in_state_3:
+    cjne @r0,#3,_continue_handling_bit7_command
+    cjne a,#0xA1,_continue_handling_bit7_command ; A1 only in state 3
+
+    mov r0,#g_turboreset_sm_state
+    mov @r0,#4
+
+    mov r0,#g_turboreset_sm_counter
+    mov @r0,#IPC_12_TIMEOUT
+
+    mov a,#LEDPATTERN_RED_ORANGE
     sjmp _turboreset_set_leds_and_return
 
 _continue_handling_bit7_command:

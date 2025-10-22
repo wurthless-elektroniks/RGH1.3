@@ -209,6 +209,7 @@ XELL_TARGETS = {
         "output":    os.path.join("ecc","rgh13_falcon_1wire.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772_ipc',
+        "cbx":       'cby'
     },
         
     "falcon_0wire" : {
@@ -217,6 +218,7 @@ XELL_TARGETS = {
         "output":    os.path.join("ecc","rgh13_falcon_0wire.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772_ipc',
+        "cbx":       'cby'
     },
 
     "jasper_1wire" : {
@@ -225,6 +227,7 @@ XELL_TARGETS = {
         "output":    os.path.join("ecc","rgh13_jasper_1wire.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752_ipc',
+        "cbx":       'cby'
     },
 
     "jasper_0wire" : {
@@ -233,6 +236,7 @@ XELL_TARGETS = {
         "output":    os.path.join("ecc","rgh13_jasper_0wire.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752_ipc',
+        "cbx":       'cby'
     },
 
     "xenon" : {
@@ -287,7 +291,10 @@ def main():
     # cd   = cd/cd_xell.bin
     # xell = xell/xell.bin
     cba  = load_or_die("cba/cba_9188_mfg.bin")
+
     cbx  = load_or_die("cbx/cbx_xell.bin")
+    cby  = load_or_die("cbx/cby.bin")
+
     cd   = load_or_die("cd/cd_xell.bin")
     xell = load_or_die("xell/xell.bin")
 
@@ -326,6 +333,11 @@ def main():
         '7378_ipc': cbb_7378_ipc,
     }
 
+    cbxs = {
+        'cbx': cbx,
+        'cby': cby
+    }
+
     try:
         for target, target_params in XELL_TARGETS.items():
             print(f"building target: {target}")
@@ -334,6 +346,7 @@ def main():
             output     = target_params["output"]
             imagetype  = target_params["imagetype"]
             cbb        = cbbs[target_params["cbb"]]
+            cbx        = cbxs['cbx'] if 'cbx' not in target_params else cbxs[target_params['cbx']]
 
             smc_data = load_or_die(smc)
 

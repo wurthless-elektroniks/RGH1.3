@@ -1,12 +1,16 @@
 import sys
 import struct
 import hashlib
+import hmac
 from argparse import ArgumentParser,RawTextHelpFormatter
 from enum import Enum
 from smc import encrypt_smc
 from cbbpatch import rgh13cbb_do_patches
+from patcher import assemble_branch
 import ecc
 import os
+
+from rc4 import RC4
 
 # RGH3 v1 uses the same SMC for Falcon and Jasper, likely because they're compatible
 # We expect these for all phat builds
@@ -98,10 +102,20 @@ SMC_FILEPATH_MAP = {
 
     'falcon_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin"),
     'jasper_1wire': os.path.join("smc", "build", "rgh13_jasper_1wire.bin"),
-    
+
     'falcon_0wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_0wire.bin"),
     'jasper_0wire': os.path.join("smc", "build", "rgh13_jasper_0wire.bin"),
 }
+
+def encrypt_cba(cba, rnd = "CB_ACB_ACB_ACB_A"):
+    key_1BL = b"\xDD\x88\xAD\x0C\x9E\xD6\x69\xE7\xB5\x67\x94\xFB\x68\x56\x3E\xFA"
+    key = hmac.new(key_1BL, rnd, hashlib.sha1).digest()[0:0x10]
+    return (key, cba[0:0x10] + rnd + RC4(key).crypt(cba[0x20:]))
+
+def encrypt_cbb(cbb, cba_key, rnd=b"CB_BCB_BCB_BCB_B", cpu_key=b"\x00"*16):
+    key = hmac.new(cba_key, rnd + cpu_key, hashlib.sha1).digest()[0:0x10]
+    return cbb[0:0x10] + rnd + RC4(key).crypt(cbb[0x20:])
+
 
 def main():
     argparser = _init_argparser()
@@ -151,8 +165,9 @@ def main():
     # find first CB @ 0x8000
     # then look at next CB in chain
     # if it's not CB_X (ver 15432), then it's not an RGH3 image
-    first_cb_size = struct.unpack(">I", nand_stripped[0x800C:0x8010])[0]
-    next_cb_addr = 0x8000+first_cb_size
+    cba_addr = 0x8000
+    cba_size = struct.unpack(">I", nand_stripped[0x800C:0x8010])[0]
+    next_cb_addr = cba_addr+cba_size
     if nand_stripped[next_cb_addr:next_cb_addr+4] != bytes([0x43, 0x42, 0x3C, 0x48]):
         print("error: not a RGH3 image - CB_X did not follow CB_A")
         return
@@ -161,6 +176,7 @@ def main():
 
     # advance to next CB stage
     cbx_size = struct.unpack(">I", nand_stripped[next_cb_addr+0x0C:next_cb_addr+0x10])[0]
+    cbx_seed = nand_stripped[next_cb_addr+0x10:next_cb_addr+0x20]
     next_cb_addr += cbx_size
     if nand_stripped[next_cb_addr:next_cb_addr+2] != bytes([0x43, 0x42]):
         print("error: CB magicword not found at next CB slot")
@@ -180,10 +196,6 @@ def main():
 
     smctype = ""
 
-    # TODO: jrunner's annoying falcon-for-xenon behavior will break things here
-    # especially because when it builds RGH3 images it'll build a falcon image.
-    # if falcon found we probably need to force the user to specify --board xenon
-    # or --board falcon
     if cbb_version == 5772 and cbb_hash == SHA1_CBB_5772_XEBUILD:
         print("found xeBuild-patched Falcon CB_B")
 
@@ -256,8 +268,55 @@ def main():
     nand_stripped[0x1000:0x4000] = smcdata_encrypted
     print("injected new SMC program")
 
+    # replace whatever CB_A is there with the 9188 MFG image
+    new_cba = None
+    with open(os.path.join("cba", "cba_9188_mfg.bin"), "rb") as f:
+        new_cba = f.read()
+    if len(new_cba) > cba_size:
+        print("error: replacement CB_A somehow larger than the original")
+        return
+
+    padding_bytes_required = cba_size - len(new_cba)
+    print(f"CB_B will be padded by {padding_bytes_required} byte(s)")
+
+    hmac_seed = nand_stripped[cba_addr+0x10:cba_addr+0x20]
+    cba_key, cba_encrypted = encrypt_cba(new_cba, rnd=hmac_seed)
+
+    cb_inject_pos = 0x8000
+    nand_stripped[cb_inject_pos:cb_inject_pos+len(cba_encrypted)] = cba_encrypted
+    cb_inject_pos += len(cba_encrypted)
+
+    print("injected CB_A 9188 MFG")
+
+    # drop CB_Y into place
+    new_cbx = None
+    cbx_file = "cby.bin" if args.zerowire or args.onewire else "cbx_xell.bin"
+    with open(os.path.join("cbx", cbx_file), "rb") as f:
+        new_cbx = f.read()
+    
+    if len(new_cbx) != 0x400:
+        print("error: CB_X/CB_Y was not 0x400 bytes")
+
+    cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed)
+
+    nand_stripped[cb_inject_pos:cb_inject_pos+len(cby_encrypted)] = cby_encrypted
+    cb_inject_pos += len(cby_encrypted)
+    print("injected CB_X/CB_Y")
+
     # inject appropriate hacked CB_B
     cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire)
+
+    # FIXME: this is a hack to get around a panic in CB_B.
+    # the best way to do this is to recalculate whatever value here so that the check passes.
+    # for now, though, this works, so we can live with this hack.
+    if cbb[0x6B2C:0x6B30] == bytes([0x40, 0x9A, 0x00, 0x14]):
+        print("CB_B 5772: skipping SMC HMAC panic")
+        cbb, _ = assemble_branch(cbb, 0x6B2C, 0x6B40)
+    elif cbb[0x6B74:0x6B78] == bytes([0x40, 0x9A, 0x00, 0x14]):
+        print("CB_B 6752: skipping SMC HMAC panic")
+        cbb, _ = assemble_branch(cbb, 0x6B74, 0x6B88)
+    else:
+        print("WARNING: can't apply SMC checksum disable patch...")
 
     if args.fast5050 or args.veryfast5050:
         training_step_default = bytes([0x01, 0x01, 0x01, 0x01])
@@ -276,9 +335,12 @@ def main():
             print("fast5050: applied 6752 patches")
         else:
             print("fast5050: CB_B unrecognized, no patches applied.")
+        
+    cbb_patched += bytes([0x00 * padding_bytes_required])
+    cbb_patched[0x000C:0x0010] = struct.pack(">I", cbb_size + padding_bytes_required)
 
-    nand_stripped[next_cb_addr:next_cb_addr+cbb_size] = cbb_patched
-    print("patched CB_B")
+    nand_stripped[cb_inject_pos:cb_inject_pos+len(cbb_patched)] = cbb_patched
+    print("patched and padded CB_B")
     
     print("recalculating ECC data...")
     nand_stripped_ecc = ecc.ecc_encode(nand_stripped, nand_type, 0)
