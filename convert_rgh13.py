@@ -327,7 +327,7 @@ def main():
     print("injected CB_X/CB_Y")
 
     # inject appropriate hacked CB_B
-    cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire)
+    cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire or args.zerowire)
 
     # FIXME: this is a hack to get around a panic in CB_B.
     # the best way to do this is to recalculate whatever value here so that the check passes.
