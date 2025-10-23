@@ -35,7 +35,7 @@ Read [this](storytime.md) if you want the full explanation.
 In short, RGH1.3 does the following:
 - We use the intermediate CB_X stage from RGH3 to speed up the initial glitch phase
 - The glitch chip gets modified RGH1.2 v2 firmware that only waits 10 ms instead of 400 ms before applying PLL slowdown
-- The SMC program is hacked to read POST bits 6 and 7 and reboots early if it doesn't like what it sees
+- The SMC program is hacked to read POST bits 6 and 7 (or receives that data from the CPU via IPC) and reboots early if it doesn't like what it sees
 - CB_B is hacked so HWINIT toggles POST bits as it's running, allowing the SMC to monitor boot progress there
 - We add a second watchdog to the SMC to reset the system if the ring of light boot animation doesn't
   play in time, which catches failed boots late in the boot process
@@ -51,7 +51,7 @@ Benefits over RGH3:
 - No possibility of SMC hangs causing the system to power off during the boot
 
 Disadvantages:
-- Requires two diodes and occasional bodges/trace cuts
+- ~~Requires two diodes and occasional bodges/trace cuts~~ Not required anymore, but still recommended for more stubborn consoles
 - See "Known improvements" below for more information
 
 ## Wiring everything up
@@ -63,18 +63,22 @@ This depends on your board and method:
 The two-wire POST methods are the oldest and probably the fastest. The code relies entirely on monitoring boot progress
 via the POST pins, and as such they require two POST diodes and occasionally some bodges.
 
-- [EXT+3 for Xenon/Elpis](install_ext3_xenon.md)
+- [EXT+3 for Xenon/Elpis, 2-wire method](install_ext3_xenon.md)
 - [RGH1.3 for Falcon/Jasper, chkstop method](install_rgh13_zfj_chkstop.md) (optimal balance between jank and functional)
 - [RGH1.3 for Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (cleaner, but more annoying)
 - [RGH1.3 for Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (jankier, but easier)
 
 ### Zero-wire POST method
 
-The zero-wire POST method was created for people who are converting their consoles from RGH1.3 or EXT_CLK but don't want
+The zero-wire POST method was created for people who are converting their consoles from RGH1.2 or EXT_CLK but don't want
 to bust out the soldering iron to add more wires (although you probably should anyway in case of a bad flash). It relies
 entirely on CPU to SMC communication to track boot progress, so it is a bit slower than the two-wire or one-wire POST methods. 
 
 Wiring is exactly the same as RGH1.2 and EXT_CLK so it will not be repeated here.
+
+**Do NOT use the zero-wire POST method for fresh installs on Jaspers.** Jaspers are subject to issues when reset glitched (see badjasper information
+below), and installing the bodge capacitor improperly will cause major CPU problems that the zero-wire method cannot detect. So be safe
+and use two-wire or one-wire methods if you're doing a fresh install.
 
 ### One-wire POST method
 
