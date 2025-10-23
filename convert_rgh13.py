@@ -115,6 +115,7 @@ SMC_FILEPATH_MAP = {
     'falcon_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin"),
     'jasper_1wire': os.path.join("smc", "build", "rgh13_jasper_1wire.bin"),
 
+    'xenon_0wire':  os.path.join("smc", "build", "rgh13_xenon_0wire.bin"),
     'falcon_0wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_0wire.bin"),
     'jasper_0wire': os.path.join("smc", "build", "rgh13_jasper_0wire.bin"),
 

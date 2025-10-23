@@ -191,6 +191,13 @@ SMC_TARGETS = {
         "output": "rgh13_xenon.bin"
     },
 
+    "xenon_0wire": {
+        "clean_smc_name": "xenon_clean.bin",
+        "asm_name": "rgh13_0wire_xenon.s",
+        "overlay_name": "rgh13_xenon_0wire_overlay.bin",
+        "output": "rgh13_xenon_0wire.bin"
+    },
+
     "jasper_for_falcon_rgh13_1wire" : {
         "clean_smc_name": "jasper_clean.bin",            
         "asm_name": "rgh13_1wire_jasper.s",              

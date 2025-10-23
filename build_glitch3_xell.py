@@ -262,12 +262,22 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '1940',
     },
+
     "xenon_5772" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_xenon.bin"),
         "output":    os.path.join("ecc","rgh13_xenon_5772.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772',
+    },
+
+    "xenon_0wire_5772" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_xenon_0wire.bin"),
+        "output":    os.path.join("ecc","rgh13_xenon_0wire_5772.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772_ipc',
+        "cbx":       'cby'
     },
 
     "elpis" : {
