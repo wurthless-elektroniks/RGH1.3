@@ -211,7 +211,15 @@ XELL_TARGETS = {
         "cbb":       '5772_ipc',
         "cbx":       'cby'
     },
-        
+    "badfalcon_1wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_badfalcon_1wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772_ipc',
+        "cbx":       'cby'
+    },
+    
     "falcon_0wire" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_0wire.bin"),
@@ -219,7 +227,7 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772_ipc',
         "cbx":       'cby'
-    },     
+    },
     "badfalcon_0wire" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_0wire.bin"),
@@ -237,7 +245,14 @@ XELL_TARGETS = {
         "cbb":       '6752_ipc',
         "cbx":       'cby'
     },
-
+    "badjasper_1wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_badjasper_1wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '6752_ipc',
+        "cbx":       'cby'
+    },
     "jasper_0wire" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_0wire.bin"),
@@ -275,6 +290,15 @@ XELL_TARGETS = {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_xenon_0wire.bin"),
         "output":    os.path.join("ecc","rgh13_xenon_0wire_5772.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '5772_ipc',
+        "cbx":       'cby'
+    },
+
+    "xenon_1wire_5772" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_xenon_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_xenon_1wire_5772.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772_ipc',
         "cbx":       'cby'

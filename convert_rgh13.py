@@ -112,13 +112,15 @@ SMC_FILEPATH_MAP = {
     'jasper_chkstop': os.path.join("smc", "build", "rgh13_jasper_chkstop.bin"),
     'badjasper_chkstop': os.path.join("smc", "build", "rgh13_badjasper_chkstop.bin"),
 
+    'xenon_1wire':  os.path.join("smc", "build", "rgh13_xenon_1wire.bin"),
     'falcon_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin"),
     'jasper_1wire': os.path.join("smc", "build", "rgh13_jasper_1wire.bin"),
+    'badfalcon_1wire': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_1wire.bin"),
+    'badjasper_1wire': os.path.join("smc", "build", "rgh13_badjasper_1wire.bin"),
 
     'xenon_0wire':  os.path.join("smc", "build", "rgh13_xenon_0wire.bin"),
     'falcon_0wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_0wire.bin"),
     'jasper_0wire': os.path.join("smc", "build", "rgh13_jasper_0wire.bin"),
-
     'badfalcon_0wire': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_0wire.bin"),
     'badjasper_0wire': os.path.join("smc", "build", "rgh13_badjasper_0wire.bin"),
 }
@@ -242,7 +244,7 @@ def main():
     elif args.zerowire:
         smctype += "_0wire"
     elif smctype in [ "zephyr", "falcon", "jasper" ]:
-        build_type = [ args.tiltsw, args.extpwr, args.chkstop, ]
+        build_type = [ args.tiltsw, args.extpwr, args.chkstop ]
 
         if True not in build_type:
             print("error: must specify one of --tiltsw OR --extpwr OR --chkstop for zephyr/falcon/jasper boards depending on your install")
