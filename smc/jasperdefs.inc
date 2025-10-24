@@ -40,3 +40,5 @@ msftsmc_deassert_cpu_reset equ 0x006C
 
 msftsmc_ipc_handle_bit7_message equ 0x0ACF
 msftsmc_ipc_write_outbox_fifo   equ 0x246C
+
+msftsmc_request_reboot equ 0x0B68

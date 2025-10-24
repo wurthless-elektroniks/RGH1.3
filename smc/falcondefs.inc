@@ -38,3 +38,5 @@ g_rol_run_bootanim                      equ 028h.7
 ; important functions
 msftsmc_sysreset_watchdog_exec_state_10 equ 0x12A3
 msftsmc_deassert_cpu_reset equ 0x006C
+
+msftsmc_request_reboot equ 0x0B63

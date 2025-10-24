@@ -73,7 +73,9 @@ _led_lightshow_sm_do_state_2:
     cjne @r0,#0,led_lightshow_sm_do_nothing
 
     ; reset on timeout
-    ljmp hard_reset
+    mov r4,#0
+    mov r5,#3
+    ljmp msftsmc_request_reboot
 
     ; IPC hook lands here
 ipc_led_anim_has_arrived:
