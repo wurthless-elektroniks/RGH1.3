@@ -450,7 +450,7 @@ def main():
     print("recalculating ECC data...")
     nand_stripped_ecc = ecc.ecc_encode(nand_stripped, nand_type, 0)
     nand = bytearray(nand)
-    nand[0:0x021000] = nand_stripped_ecc
+    nand[0:len(nand_stripped_ecc)] = nand_stripped_ecc
 
     print("writing final NAND...")
     with open(args.updflash, "wb") as f:
