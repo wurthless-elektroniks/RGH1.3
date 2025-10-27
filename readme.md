@@ -156,17 +156,26 @@ and shut down. Press Eject and Sync as usual to get the error codes. The RGH1.3 
 
 I doubt J-Runner will ever support this crap so here's a workaround.
 
-In J-Runner, make sure "RGH3" is selected before building your NAND. It doesn't matter if you select 27 MHz or 10 MHz,
-the buildscript will use the same SMC regardless.
+When you build an image in J-Runner, you can either build a Glitch2 image directly, or you can convert it to RGH3 first.
+The converter script supports both, but **you will need to specify your CPU key when converting a Glitch2 image.**
 
-Once your image is built and converted to RGH3, **don't flash it immediately**. You need to write some crap on the commandline.
+Once your image is built, **don't flash it immediately**. You need to write some crap on the commandline.
 
-For Xenon it's simple: `python3 convert_rgh3.py --board xenon path/to/updflash.bin`
+Running `python3 convert_rgh3.py --help` gets you the usage, but the basic usage is:
 
-For Falcon and Jasper, you will need to add more arguments depending on which method you used and whether you needed a badjasper SMC.
-Examples are:
-- `python3 convert_rgh3.py --board falcon --chkstop path/to/updflash.bin`
-- `python3 convert_rgh3.py --board jasper --chkstop --badjasper path/to/updflash.bin`
+- For Glitch2, you need to specify your CPU key: `python3 convert_rgh3.py --board xenon --cpukey ...your cpukey... path/to/updflash.bin`
+- For RGH3, specifying your CPU key is recommended, but optional: `python3 convert_rgh3.py --board xenon path/to/updflash.bin`
+
+You will also need to specify your method so the right SMC is used:
+- Xenon/Elpis: If you don't specify anything, the default is two-wire. Also supports `--zerowire` and `--onewire`
+- Zephyr/Falcon/Jasper: You need to specify a method, one of: `--tiltsw`, `--extpwr`, `--chkstop`, `--onewire`, `--zerowire`
+
+**Important note about boards:**
+- If you are using a Samsung Elpis board, you will need to specify `--board elpis`
+- J-Runner's bad habit of building too many things with the Falcon loader will require you to specify `--board falcon` or `--board xenon`
+- Zephyr and Jasper will be autodetected, as will Elpis images that are already using the Elpis 7378 loader
+
+And don't forget to add `--badjasper` if your system needs the badjasper workaround.
 
 If you get the message
 
