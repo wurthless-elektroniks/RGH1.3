@@ -76,13 +76,21 @@ entirely on CPU to SMC communication to track boot progress, so it is a bit slow
 
 Wiring is exactly the same as RGH1.2 and EXT_CLK so it will not be repeated here.
 
-**Do NOT use the zero-wire POST method for fresh installs on Jaspers.** Jaspers are subject to issues when reset glitched (see badjasper information
-below), and installing the bodge capacitor improperly will cause major CPU problems that the zero-wire method cannot detect. So be safe
-and use two-wire or one-wire methods if you're doing a fresh install.
+**It is STRONGLY RECOMMENDED that you DO NOT immediately use the zero-wire POST method for fresh installs on Jaspers.** Jaspers
+are subject to issues when reset glitched (see badjasper information below), and installing the bodge capacitor improperly will
+cause major CPU problems that the zero-wire method cannot detect. So start with a two-wire or one-wire install, test your system,
+fix any issues, and then convert to zero-wire.
 
 ### One-wire POST method
 
-In progress, to be documented when it's done.
+The one-wire POST method is a compromise between the two-wire and zero-wire methods. It monitors POST bit 7 to know when CB_A starts
+and finishes execution, then uses CPU-SMC communication the rest of the way. This makes it faster than the zero-wire method, but still
+a bit slower than two-wire methods.
+
+Documentation is still to be written but the basic installation with the diode is:
+
+- Xenon/Elpis: Same as 2-wire, but connect POST 7 only
+- Zephyr/Falcon/Jasper: Connect POST 7 to GPU_RESET_DONE
 
 ## Flashing XeLL
 
@@ -245,11 +253,6 @@ For bug reports, please provide the following:
 See [here](https://github.com/wurthless-elektroniks/RGH1.3/issues) for known bugs.
 
 ## Known issues and improvements
-
-- It's possible to get rid of the POST diode(s), but the only way to do that is to manually initialize the SMC FIFOs at the
-  start of CB_B, when the CPU is still coming out of the glitch and can be in an unstable state, so it wouldn't be that
-  reliable anyway. Plus which, most failed glitch attempts will die within the first 100 ms, which means we have to monitor
-  the POST lines anyway.
 
 - It's possible to speed up resets on failed attempts simply by resetting the CPU. However, the CPU can go into
   a coma on failed attempts, which will cause it to lock up and ignore any attempts to reset it.
