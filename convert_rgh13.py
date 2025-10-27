@@ -19,15 +19,10 @@ from rc4 import RC4
 SHA1_FALCON_RGH3_27MHZ = "9b89a53dbdb4735782e92b70bb5e956f6b35da5f"
 SHA1_FALCON_RGH3_10MHZ = "a4ae6a6f1ff374739d1c91f8a2881f4eecc210d3"
 
-# TODO: calc this hash
-SHA1_CBB_4577_XEBUILD = ""
-
+SHA1_CBB_4577_XEBUILD = "a67690a35bcc6284c53933fed721b56abbde312b"
 SHA1_CBB_5772_XEBUILD = "3a8fb9580ce01cf1c0e2d885e0fd96a05571643f"
 SHA1_CBB_6752_XEBUILD = "899cd01e00ef7b27ceb010dde42e4d6e9c871330"
-
-# TODO: calc hash of patched elpiss 7378 now that jrunner is supporting it
-SHA1_CBB_7378_ELPISS  = ""
-
+SHA1_CBB_7378_ELPISS  = "9110a599e8f566e16635affeef4aeadf3c80efd5"
 
 def _parse_cpukey(cpu_key):
     CPUKEY_EXP = re.compile(r"^[0-9a-fA-F]{32}$")
@@ -415,12 +410,11 @@ def main():
     if cbb_version == 5772 and args.board == "xenon":
         print("replacing xeBuild 5772 CB_B with 1940")
         cbb = _load_and_patch_cb("cb_1940")
-
-    elif cbb_version == 5772 and args.board == "elpis":
+    '''
+    if cbb_version == 5772 and args.board == "elpis":
         print("replacing xeBuild 5772 CB_B with 7378")
         cbb = _load_and_patch_cb("cbb_7378")
-    '''
-
+    
     # inject appropriate hacked CB_B
     cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire or args.zerowire)
 
@@ -435,6 +429,8 @@ def main():
         cbb, _ = assemble_branch(cbb, 0x6B74, 0x6B88)
     elif cbb_version == 4577:
         cbb = xebuild_apply_cb_patch_from_file(cbb, os.path.join("patches", "cbb_4577_nosmcsum.bin"))
+    elif cbb_version == 7378:
+        cbb = xebuild_apply_cb_patch_from_file(cbb, os.path.join("patches", "cbb_7378_nosmcsum.bin"))
     else:
         print("WARNING: can't apply SMC checksum disable patch...")
 
