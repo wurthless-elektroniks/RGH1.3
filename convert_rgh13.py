@@ -261,11 +261,14 @@ def main():
         print("found glitch3/RGH3 image")
         imagetype = 3
     elif 'cbb' in loaders:
+        raise RuntimeError("glitch2 to rgh1.3 conversion is broken at the moment. please convert from RGH3 for now...")
+        '''
         if args.cpukey is None:
             print("error: glitch2 image detected - you must specify CPU key")
             return
         print("found glitch2/RGH1.2 image")
         imagetype = 2
+        '''
     else:
         print("error: unrecognized image type. stopping.")
         return
@@ -390,7 +393,7 @@ def main():
     if len(new_cbx) != 0x400:
         print("error: CB_X/CB_Y was not 0x400 bytes")
 
-    cbx_seed = loaders['cbx' if 'cbx' in loaders else 'cbb'][0x10:0x20]
+    cbx_seed = bytes([0]*16)
 
     if cbx_file == "cbx_xell.bin":
         new_cbx = bytearray(new_cbx)
