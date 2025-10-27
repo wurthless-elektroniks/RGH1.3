@@ -141,7 +141,7 @@ decrypt_cba = encrypt_cba
 
 def encrypt_cbb(cbb, cba_key, rnd=b"CB_BCB_BCB_BCB_B", cpu_key=b"\x00"*16):
     key = hmac.new(cba_key, rnd + cpu_key, hashlib.sha1).digest()[0:0x10]
-    return cbb[0:0x10] + rnd + RC4(key).crypt(cbb[0x20:])
+    return (key, cbb[0:0x10] + rnd + RC4(key).crypt(cbb[0x20:]))
 
 decrypt_cbb = encrypt_cbb
 
@@ -261,14 +261,11 @@ def main():
         print("found glitch3/RGH3 image")
         imagetype = 3
     elif 'cbb' in loaders:
-        raise RuntimeError("glitch2 to rgh1.3 conversion is broken at the moment. please convert from RGH3 for now...")
-        '''
         if args.cpukey is None:
             print("error: glitch2 image detected - you must specify CPU key")
             return
         print("found glitch2/RGH1.2 image")
         imagetype = 2
-        '''
     else:
         print("error: unrecognized image type. stopping.")
         return
@@ -276,9 +273,12 @@ def main():
     cba_seed = loaders['cba'][0x10:0x20]
     cba_key, _ = decrypt_cba(loaders['cba'], rnd=cba_seed)
     if imagetype == 2:
-        cbb = decrypt_cbb(loaders['cbb'], cba_key, loaders['cbb'][0x10:0x20], cpu_key=args.cpukey)
+        cbb_key, cbb = decrypt_cbb(loaders['cbb'], cba_key, loaders['cbb'][0x10:0x20], cpu_key=args.cpukey)
+
+        # put proper decryption key in place or else CD will not decrypt correctly
+        cbb[0x10:0x20] = cbb_key
     else:
-        cbb = loaders['cbb'] # Glitch3 already has that in plaintext
+        cbb = loaders['cbb']     # Glitch3 already has that in plaintext
 
     cbb_version = struct.unpack(">H",cbb[2:4])[0]
     cbb_size = struct.unpack(">I", cbb[0x0C:0x10])[0]
@@ -381,7 +381,7 @@ def main():
         new_cba = f.read()
     print(f"loaded CB_A from file: {cba_file}")
     
-    cba_key, cba_encrypted = encrypt_cba(new_cba, rnd=cba_seed)
+    cba_key, cba_encrypted = encrypt_cba(new_cba, rnd=b"15432 py builder")
     new_loader_buffer += cba_encrypted
 
     # drop CB_Y into place
@@ -403,23 +403,31 @@ def main():
     print(f"loaded CB_X/CB_Y from file: {cbx_file}")
 
     if args.cpukey is None:
-        cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed)
+        _, cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed)
     else:
-        cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed, cpu_key=args.cpukey)
+        _, cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed, cpu_key=args.cpukey)
 
     new_loader_buffer += cby_encrypted
+
+    # backup params now in case they get replaced
+    cbb_params = cbb[0x10:0x40]
 
     '''
     if cbb_version == 5772 and args.board == "xenon":
         print("replacing xeBuild 5772 CB_B with 1940")
         cbb = _load_and_patch_cb("cb_1940")
     '''
+
     if cbb_version == 5772 and args.board == "elpis":
         print("replacing xeBuild 5772 CB_B with 7378")
         cbb = _load_and_patch_cb("cbb_7378")
+
     
     # inject appropriate hacked CB_B
     cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire or args.zerowire)
+
+    # restore parameters if the CB_B was replaced
+    cbb_patched[0x10:0x40] = cbb_params
 
     # FIXME: this is a hack to get around a panic in CB_B.
     # the best way to do this is to recalculate whatever value here so that the check passes.
@@ -470,7 +478,7 @@ def main():
     print(f"built new loader space successfully. total was {len(new_loader_buffer)}, with {zeropad_size} byte(s) to spare")
     new_loader_buffer += bytes([0] * zeropad_size)
 
-    nand_stripped[0x8000:0x8000+max_loaderspace_size] = new_loader_buffer
+    nand_stripped[0x8000:0x8000+len(new_loader_buffer)] = new_loader_buffer
     print("injected patched loader chain successfully!")
 
     print("recalculating ECC data...")
