@@ -421,16 +421,16 @@ def main():
     # FIXME: this is a hack to get around a panic in CB_B.
     # the best way to do this is to recalculate whatever value here so that the check passes.
     # for now, though, this works, so we can live with this hack.
-    if cbb[0x6B2C:0x6B30] == bytes([0x40, 0x9A, 0x00, 0x14]):
+    if cbb_patched[0x6B2C:0x6B30] == bytes([0x40, 0x9A, 0x00, 0x14]):
         print("CB_B 5772: skipping SMC HMAC panic")
-        cbb, _ = assemble_branch(cbb, 0x6B2C, 0x6B40)
+        cbb_patched, _ = assemble_branch(cbb_patched, 0x6B2C, 0x6B40)
     elif cbb[0x6B74:0x6B78] == bytes([0x40, 0x9A, 0x00, 0x14]):
         print("CB_B 6752: skipping SMC HMAC panic")
-        cbb, _ = assemble_branch(cbb, 0x6B74, 0x6B88)
+        cbb_patched, _ = assemble_branch(cbb_patched, 0x6B74, 0x6B88)
     elif cbb_version == 4577:
-        cbb = xebuild_apply_cb_patch_from_file(cbb, os.path.join("patches", "cbb_4577_nosmcsum.bin"))
+        cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, os.path.join("patches", "cbb_4577_nosmcsum.bin"))
     elif cbb_version == 7378:
-        cbb = xebuild_apply_cb_patch_from_file(cbb, os.path.join("patches", "cbb_7378_nosmcsum.bin"))
+        cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, os.path.join("patches", "cbb_7378_nosmcsum.bin"))
     else:
         print("WARNING: can't apply SMC checksum disable patch...")
 
