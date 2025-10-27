@@ -8,6 +8,7 @@ from enum import Enum
 from smc import encrypt_smc
 from cbbpatch import rgh13cbb_do_patches
 from patcher import assemble_branch
+from xebuildpatch import xebuild_apply_cb_patch, xebuild_apply_cb_patch_from_file
 import ecc
 import os
 
@@ -149,6 +150,16 @@ def encrypt_cbb(cbb, cba_key, rnd=b"CB_BCB_BCB_BCB_B", cpu_key=b"\x00"*16):
 
 decrypt_cbb = encrypt_cbb
 
+def _load_and_patch_cb(cb_prefix: str) -> bytes:
+    cb = None
+    with open(os.path.join("cbb", f"{cb}_clean.bin"),"rb") as f:
+        cb = f.read()
+    patch = None
+    with open(os.path.join("xebuild", f"{cb}_xebuild.bin"), "rb") as f:
+        patch = f.read()
+
+    return xebuild_apply_cb_patch(cb, patch)
+
 def _extract_loaders(nand_stripped: bytes) -> dict:
     pos = 0x8000
     result = {}
@@ -215,7 +226,7 @@ def main():
 
     nand_stripped = ecc.ecc_strip(nand[0:0x021000 * 4])
 
-    # the SMC data MUST be from 0x1000~0x4000, there's no microsoft SMC that isn't like that
+    # the SMC data MUST be from 0x1000~0x4000 (slims are not supported right now)
     if nand_stripped[0x78:0x80] != bytes([0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x10, 0x00]):
         print("error: SMC isn't located at 0x1000~0x4000 like it should be. something's wrong with your NAND.")
         return
@@ -400,6 +411,16 @@ def main():
 
     new_loader_buffer += cby_encrypted
 
+    '''
+    if cbb_version == 5772 and args.board == "xenon":
+        print("replacing xeBuild 5772 CB_B with 1940")
+        cbb = _load_and_patch_cb("cb_1940")
+
+    elif cbb_version == 5772 and args.board == "elpis":
+        print("replacing xeBuild 5772 CB_B with 7378")
+        cbb = _load_and_patch_cb("cbb_7378")
+    '''
+
     # inject appropriate hacked CB_B
     cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire or args.zerowire)
 
@@ -412,6 +433,8 @@ def main():
     elif cbb[0x6B74:0x6B78] == bytes([0x40, 0x9A, 0x00, 0x14]):
         print("CB_B 6752: skipping SMC HMAC panic")
         cbb, _ = assemble_branch(cbb, 0x6B74, 0x6B88)
+    elif cbb_version == 4577:
+        cbb = xebuild_apply_cb_patch_from_file(cbb, os.path.join("patches", "cbb_4577_nosmcsum.bin"))
     else:
         print("WARNING: can't apply SMC checksum disable patch...")
 
@@ -430,6 +453,10 @@ def main():
             cbb_patched[0x4e54:0x4e58] = training_step_fast
             cbb_patched[0x51d0:0x51d4] = training_step_fast
             print("fast5050: applied 6752 patches")
+        elif cbb_version == 4577:
+            cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, os.path.join("patches",
+                                                                                     "cbb_4577_veryfast5050.bin" if args.veryfast5050 else "cbb_4577_fast5050.bin")
+                                                                                    )
         else:
             print("fast5050: CB_B unrecognized, no patches applied.")
         

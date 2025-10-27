@@ -16,6 +16,7 @@ from xell.patch_5772_xell import xell5772_do_patches
 from xell.patch_6752_xell import xell6752_do_patches
 from xell.patch_7378_xell import xell7378_do_patches
 from cbbpatch import rgh13cbb_do_patches
+from xebuildpatch import xebuild_apply_cb_patch
 
 key_1BL = b"\xDD\x88\xAD\x0C\x9E\xD6\x69\xE7\xB5\x67\x94\xFB\x68\x56\x3E\xFA"
 
@@ -139,6 +140,21 @@ def _permutate_zfj_targets(gpio_name: str) -> dict:
             "imagetype": ImageType.GLITCH3,
             "cbb":       '5772',
         },
+        f"zephyr_{gpio_name}" : {
+            "nandtype":  NandType.NAND_16M,
+            "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
+            "output":    os.path.join("ecc",f"rgh13_zephyr_{gpio_name}.ecc"),
+            "imagetype": ImageType.GLITCH3,
+            "cbb":       '4577',
+        },
+        f"badzephyr_{gpio_name}" : {
+            "nandtype":  NandType.NAND_16M,
+            "smc":       os.path.join("smc","build",f"rgh13_badjasper_for_falcon_{gpio_name}.bin"),
+            "output":    os.path.join("ecc",f"rgh13_badzephyr_{gpio_name}.ecc"),
+            "imagetype": ImageType.GLITCH3,
+            "cbb":       '4577',
+        },
+
         f"jasper_{gpio_name}" : {
             "nandtype": NandType.NAND_16M_JASPER,
             "smc":      os.path.join("smc","build",f"rgh13_jasper_{gpio_name}.bin"),
@@ -188,6 +204,20 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '5772',
     },
+    "zephyr_tiltsw" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon.bin"),
+        "output":    os.path.join("ecc","rgh13_zephyr_tiltsw.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '4577',
+    },
+    "badzephyr_tiltsw" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon.bin"),
+        "output":    os.path.join("ecc","rgh13_badzephyr_tiltsw.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '4577',
+    },
     "jasper_tiltsw" : {
         "nandtype": NandType.NAND_16M_JASPER,
         "smc":      os.path.join("smc","build","rgh13_jasper.bin"),
@@ -202,7 +232,7 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752'
     },
-    
+
     "falcon_1wire" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_1wire.bin"),
@@ -220,6 +250,23 @@ XELL_TARGETS = {
         "cbx":       'cby'
     },
     
+    "zephyr_1wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_zephyr_1wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '4577_ipc',
+        "cbx":       'cby'
+    },
+    "badzephyr_1wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_badzephyr_1wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '4577_ipc',
+        "cbx":       'cby'
+    },
+
     "falcon_0wire" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_0wire.bin"),
@@ -237,6 +284,22 @@ XELL_TARGETS = {
         "cbx":       'cby'
     },
 
+    "zephyr_0wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_0wire.bin"),
+        "output":    os.path.join("ecc","rgh13_zephyr_0wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '4577_ipc',
+        "cbx":       'cby'
+    },
+    "badzephyr_0wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_0wire.bin"),
+        "output":    os.path.join("ecc","rgh13_badzephyr_0wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '4577_ipc',
+        "cbx":       'cby'
+    },
     "jasper_1wire" : {
         "nandtype":  NandType.NAND_16M,
         "smc":       os.path.join("smc","build","rgh13_jasper_1wire.bin"),
@@ -332,6 +395,16 @@ XELL_TARGETS = {
 XELL_TARGETS.update(_permutate_zfj_targets("extpwr"))
 XELL_TARGETS.update(_permutate_zfj_targets("chkstop"))
 
+def _load_and_patch_cb(cb_prefix: str) -> bytes:
+    cb = None
+    with open(os.path.join("cbb", f"{cb_prefix}_clean.bin"),"rb") as f:
+        cb = f.read()
+    patch = None
+    with open(os.path.join("xell", f"{cb_prefix}_xell.bin"), "rb") as f:
+        patch = f.read()
+
+    return xebuild_apply_cb_patch(cb, patch)
+
 def main():
     print("loading prerequisite binaries...")
 
@@ -350,6 +423,7 @@ def main():
 
     cbb_1940 = load_or_die(os.path.join("cbb","cb_1940_clean.bin"))
     cbb_1940 = xell1940_do_patches(cbb_1940)
+    cbb_4577 = _load_and_patch_cb("cbb_4577")
     cbb_5772 = load_or_die(os.path.join("cbb","cbb_5772_clean.bin"))
     cbb_5772 = xell5772_do_patches(cbb_5772)
     cbb_6752 = load_or_die(os.path.join("cbb","cbb_6752_clean.bin"))
@@ -360,10 +434,12 @@ def main():
 
     # rgh13cbb_do_patches() autodetects which patches to apply then applies them
     cbb_1940_ipc = rgh13cbb_do_patches(bytearray(cbb_1940), use_smc_ipc=True)
+    cbb_4577_ipc = rgh13cbb_do_patches(bytearray(cbb_4577), use_smc_ipc=True)
     cbb_5772_ipc = rgh13cbb_do_patches(bytearray(cbb_5772), use_smc_ipc=True)
     cbb_6752_ipc = rgh13cbb_do_patches(bytearray(cbb_6752), use_smc_ipc=True)
     cbb_7378_ipc = rgh13cbb_do_patches(bytearray(cbb_7378), use_smc_ipc=True)
     cbb_1940     = rgh13cbb_do_patches(cbb_1940, use_smc_ipc=False)
+    cbb_4577     = rgh13cbb_do_patches(cbb_4577, use_smc_ipc=False)
     cbb_5772     = rgh13cbb_do_patches(cbb_5772, use_smc_ipc=False)
     cbb_6752     = rgh13cbb_do_patches(cbb_6752, use_smc_ipc=False)
     cbb_7378     = rgh13cbb_do_patches(cbb_7378, use_smc_ipc=False)
@@ -372,6 +448,9 @@ def main():
     cbbs = {
         '1940':     cbb_1940,
         '1940_ipc': cbb_1940_ipc,
+
+        '4577':      cbb_4577,
+        '4577_ipc':  cbb_4577_ipc,
 
         '5666': load_or_die(os.path.join("cbb","cbb_5666_xell.bin")),
 
