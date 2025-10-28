@@ -427,6 +427,7 @@ def main():
         if cbb_version == 5772 and args.board == "elpis":
             print("replacing xeBuild 5772 CB_B with 7378")
             cbb = _load_and_patch_cb("cbb_7378")
+            cbb_version = 7378
 
     
     # inject appropriate hacked CB_B
@@ -438,40 +439,13 @@ def main():
     # FIXME: this is a hack to get around a panic in CB_B.
     # the best way to do this is to recalculate whatever value here so that the check passes.
     # for now, though, this works, so we can live with this hack.
-    if cbb_patched[0x6B2C:0x6B30] == bytes([0x40, 0x9A, 0x00, 0x14]):
-        print("CB_B 5772: skipping SMC HMAC panic")
-        cbb_patched, _ = assemble_branch(cbb_patched, 0x6B2C, 0x6B40)
-    elif cbb[0x6B74:0x6B78] == bytes([0x40, 0x9A, 0x00, 0x14]):
-        print("CB_B 6752: skipping SMC HMAC panic")
-        cbb_patched, _ = assemble_branch(cbb_patched, 0x6B74, 0x6B88)
-    elif cbb_version == 4577:
-        cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, os.path.join("patches", "cbb_4577_nosmcsum.bin"))
-    elif cbb_version == 7378:
-        cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, os.path.join("patches", "cbb_7378_nosmcsum.bin"))
-    else:
-        print("WARNING: can't apply SMC checksum disable patch...")
-
+    cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched,
+                                                   os.path.join("patches",  f"cbb_{cbb_version}_nosmcsum.bin"))
+    
     if args.fast5050 or args.veryfast5050:
-        training_step_default = bytes([0x01, 0x01, 0x01, 0x01])
-        training_step_fast    = bytes([0x10, 0x10, 0x10, 0x10]) if args.veryfast5050 else bytes([0x04, 0x04, 0x04, 0x04])
-        if cbb_patched[0x46B0:0x46B4] == training_step_default and \
-            cbb_patched[0x4A2C:0x4A30] == training_step_default:
-            
-            cbb_patched[0x46B0:0x46B4] = training_step_fast
-            cbb_patched[0x4A2C:0x4A30] = training_step_fast
-            print("fast5050: applied 5772 patches")
-        elif cbb_patched[0x4e54:0x4e58] == training_step_default and \
-            cbb_patched[0x51d0:0x51d4] == training_step_default:
-            
-            cbb_patched[0x4e54:0x4e58] = training_step_fast
-            cbb_patched[0x51d0:0x51d4] = training_step_fast
-            print("fast5050: applied 6752 patches")
-        elif cbb_version == 4577:
-            cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, os.path.join("patches",
-                                                                                     "cbb_4577_veryfast5050.bin" if args.veryfast5050 else "cbb_4577_fast5050.bin")
-                                                                                    )
-        else:
-            print("fast5050: CB_B unrecognized, no patches applied.")
+        patchfile = os.path.join("patches",  f"cbb_{cbb_version}_{'very' if args.veryfast5050 else ''}fast5050.bin")
+        if os.path.exists(patchfile):
+            cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, patchfile)
         
     new_loader_buffer += cbb_patched
     new_loader_buffer += loaders['cd']
