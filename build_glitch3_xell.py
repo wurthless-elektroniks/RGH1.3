@@ -116,16 +116,6 @@ def _permutate_zfj_targets(gpio_name: str) -> dict:
             "imagetype": ImageType.GLITCH3,
             "cbb":       '1940',
         },
-
-        # Hacked 5772 with long hwinit loops skipped, boots Falcons ludicrously fast
-        f"falcon_{gpio_name}_5666" : {
-            "nandtype":  NandType.NAND_16M,
-            "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
-            "output":    os.path.join("ecc",f"rgh13_falcon_{gpio_name}_5666.ecc"),
-            "imagetype": ImageType.GLITCH3,
-            "cbb":       '5666',
-        },
-
         f"falcon_{gpio_name}" : {
             "nandtype":  NandType.NAND_16M,
             "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
@@ -182,13 +172,6 @@ XELL_TARGETS = {
         "output":    os.path.join("ecc","rgh13_falcon_tiltsw_1940.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '1940',
-    },
-    "falcon_tiltsw_5666" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon.bin"),
-        "output":    os.path.join("ecc","rgh13_falcon_tiltsw_5666.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '5666',
     },
     "falcon_tiltsw" : {
         "nandtype":  NandType.NAND_16M,
@@ -374,6 +357,22 @@ XELL_TARGETS = {
         "imagetype": ImageType.GLITCH3,
         "cbb":       '7378',
     },
+    "elpis_1wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_xenon_1wire.bin"),
+        "output":    os.path.join("ecc","rgh13_elpis_1wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '7378_ipc',
+        "cbx":       'cby'
+    },
+    "elpis_0wire" : {
+        "nandtype":  NandType.NAND_16M,
+        "smc":       os.path.join("smc","build","rgh13_xenon_0wire.bin"),
+        "output":    os.path.join("ecc","rgh13_elpis_0wire.ecc"),
+        "imagetype": ImageType.GLITCH3,
+        "cbb":       '7378_ipc',
+        "cbx":       'cby'
+    },
 
     # test ECC for testing CB_B patches
     "test_falcon_resetme": {
@@ -381,7 +380,7 @@ XELL_TARGETS = {
         "smc":       os.path.join("smc","smc+resetme_falcon.bin"),
         "output":    os.path.join("ecc","testonly_smc+resetme_falcon.ecc"),
         "imagetype": ImageType.GLITCH3,
-        "cbb":       '5666'
+        "cbb":       '5772'
     },
     "test_jasper_resetme": {
         "nandtype":  NandType.NAND_16M_JASPER,
@@ -452,12 +451,11 @@ def main():
         '4577':      cbb_4577,
         '4577_ipc':  cbb_4577_ipc,
 
-        '5666': load_or_die(os.path.join("cbb","cbb_5666_xell.bin")),
-
         '5772':     cbb_5772,
         '5772_ipc': cbb_5772_ipc,
         '6752':     cbb_6752,
         '6752_ipc': cbb_6752_ipc,
+
         '7378':     cbb_7378,
         '7378_ipc': cbb_7378_ipc,
     }

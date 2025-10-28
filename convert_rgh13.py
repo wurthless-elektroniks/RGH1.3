@@ -42,6 +42,11 @@ def _init_argparser():
                            type=_parse_cpukey,
                            help="Specify CPU key (required for Glitch2 images or to run older kernels)")
     
+    argparser.add_argument("--keep-cb",
+                           default=False,
+                           action='store_true',
+                           help="Do not replace CB_B in image (e.g. for Xenon and Elpis)")
+
     argparser.add_argument("--fast5050",
                            default=False,
                            action='store_true',
@@ -412,15 +417,16 @@ def main():
     # backup params now in case they get replaced
     cbb_params = cbb[0x10:0x40]
 
-    '''
-    if cbb_version == 5772 and args.board == "xenon":
-        print("replacing xeBuild 5772 CB_B with 1940")
-        cbb = _load_and_patch_cb("cb_1940")
-    '''
+    if args.keep_cb is False:
+        '''
+        if cbb_version == 5772 and args.board == "xenon":
+            print("replacing xeBuild 5772 CB_B with 1940")
+            cbb = _load_and_patch_cb("cb_1940")
+        '''
 
-    if cbb_version == 5772 and args.board == "elpis":
-        print("replacing xeBuild 5772 CB_B with 7378")
-        cbb = _load_and_patch_cb("cbb_7378")
+        if cbb_version == 5772 and args.board == "elpis":
+            print("replacing xeBuild 5772 CB_B with 7378")
+            cbb = _load_and_patch_cb("cbb_7378")
 
     
     # inject appropriate hacked CB_B
