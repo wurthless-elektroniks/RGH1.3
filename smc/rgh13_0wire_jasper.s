@@ -1,4 +1,10 @@
 
+ifndef ZEPHYR
+    ; zephyr has a jumper where checkstop normally is.
+    ; if this is 1, then patch out checkstop checks always.
+    ZEPHYR equ 0
+endif
+
     ; horrible hack 
 ifdef JASPER_FOR_FALCON
     JASPER equ 0
@@ -45,6 +51,11 @@ CBB_HWINIT_POST6_TOGGLE_TIMEOUT equ 35
 ;
 ; ------------------------------------------------------------------------------------
     .org 0x0000
+
+if ZEPHYR=1
+    .include "rgh13_jasper_chkstop_decls.inc"
+endif
+
     mov dptr,#mainloop_reorg_start
     mov dptr,#mainloop_reorg_end
 
@@ -167,6 +178,10 @@ powerup_reroute_start:
     lcall powerup_event_callback
     nop ; because we overwrote two CLR opcodes
 powerup_reroute_end:
+
+if ZEPHYR=1
+    .include "rgh13_jasper_chkstop_patches.s"
+endif
 
     .org 0x2D73
 rgh13_common_code_start:

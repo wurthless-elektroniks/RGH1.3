@@ -48,15 +48,8 @@ def decrypt_smc(data: bytes) -> bytes:
 
     return res
 
-def _rol64(val: int, count: int) -> int:
-    for _ in range(0,count):
-        carry = (val & 0x8000000000000000) != 0
-        val <<= 1
-        val &= 0xFFFFFFFFFFFFFFFF
-        if carry is True:
-            val |= 1
-    return val
-
+# this checksum is actually fed through XeCryptHmacShaVerify()
+# not sure of keys or all that yet
 def calc_smc_checksum(cyphertext: bytes, seed: list = None) -> list:
     '''
     Recalc SMC checksum from encrypted SMC image.
@@ -77,19 +70,15 @@ def calc_smc_checksum(cyphertext: bytes, seed: list = None) -> list:
         dat = struct.unpack(">I", cyphertext[pos:pos+4])[0]
 
         sumval += dat
-        sumval &= 0xFFFFFFFFFFFFFFFF
-
         diffval -= dat
-        
-        # convert to 2s complement on underflow
-        if diffval < 0:
-            diffval += 2**64
 
+        sumval = sumval * 0x20000000 | sumval >> 0x23
+        diffval = diffval * 0x80000000 | diffval >> 0x21
+
+        sumval  &= 0xFFFFFFFFFFFFFFFF
         diffval &= 0xFFFFFFFFFFFFFFFF
-
-        sumval = _rol64(sumval, 0x1D)
-        diffval = _rol64(diffval, 0x1F)
 
         pos += 4
     
-    return [sumval, diffval]
+    return struct.pack(">QQ",sumval,diffval)
+

@@ -296,17 +296,16 @@ def main():
 
     if cbb_version == 4577 and cbb_hash == SHA1_CBB_4577_XEBUILD:
         print("found xeBuild-patched Zephyr CB_B")
-        smctype = "zephyr"
-        
-    if cbb_version == 5772 and cbb_hash == SHA1_CBB_5772_XEBUILD:
+        smctype = "zephyr"  
+    elif cbb_version == 5772 and cbb_hash == SHA1_CBB_5772_XEBUILD:
         print("found xeBuild-patched Falcon CB_B")
 
         # J-Runner's annoying Falcon-for-Xenon behavior forces us to do this
         if args.board is None:
-            print("error: ambiguous target board. please specify --board xenon, --board elpis or --board falcon")
+            print("error: ambiguous target board. please specify --board xenon, --board elpis, --board falcon, --board zephyr")
             return
         
-        if args.board not in [ "xenon", "falcon", "elpis" ]:
+        if args.board not in [ "xenon", "falcon", "elpis", "zephyr" ]:
             print("error: 5772 should only be present on falcon and falcon-for-xenon builds")
             return
 
@@ -428,7 +427,10 @@ def main():
             print("replacing xeBuild 5772 CB_B with 7378")
             cbb = _load_and_patch_cb("cbb_7378")
             cbb_version = 7378
-
+        elif cbb_version == 5772 and args.board == "zephyr":
+            print("replacing xeBuild 5772 CB_B with 4577")
+            cbb = _load_and_patch_cb("cbb_4577")
+            cbb_version = 4577
     
     # inject appropriate hacked CB_B
     cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire or args.zerowire)

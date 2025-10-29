@@ -2,6 +2,13 @@
 ; RGH1.3 code for Jasper
 ;
 
+
+ifndef ZEPHYR
+    ; zephyr has a jumper where checkstop normally is.
+    ; if this is 1, then patch out checkstop checks always.
+    ZEPHYR equ 0
+endif
+
     ; horrible hack 
 ifdef JASPER_FOR_FALCON
     JASPER equ 0
@@ -95,7 +102,7 @@ if RGH13_POST_7=gpio_ext_pwr_on_n
     .include "rgh13_jasper_extpwr_decls.inc"
 endif
 
-if RGH13_POST_7=gpio_smc_cpu_chkstop_detect
+if (RGH13_POST_7=gpio_smc_cpu_chkstop_detect || ZEPHYR=1)
     .include "rgh13_jasper_chkstop_decls.inc"
 endif
 
@@ -203,7 +210,7 @@ endif
 if RGH13_POST_7=gpio_ext_pwr_on_n
     .include "rgh13_jasper_extpwr_patches.s"
 endif
-if RGH13_POST_7=gpio_smc_cpu_chkstop_detect
+if (RGH13_POST_7=gpio_smc_cpu_chkstop_detect || ZEPHYR=1)
     .include "rgh13_jasper_chkstop_patches.s"
 endif
 

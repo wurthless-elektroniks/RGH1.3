@@ -103,7 +103,7 @@ def load_or_die(path: str) -> bytes:
     with open(path, "rb") as f:
         return f.read()
 
-def _permutate_zfj_targets(gpio_name: str) -> dict:
+def _permutate_zfj_targets(gpio_name: str, use_ipc = False) -> dict:
     # FIXME: there is a bug in the Falcon SMC code that results in the board playing blind
     # For now, use Jasper-on-Falcon SMCs for Falcon targets
     # See https://github.com/wurthless-elektroniks/RGH1.3/issues/1
@@ -114,50 +114,56 @@ def _permutate_zfj_targets(gpio_name: str) -> dict:
             "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
             "output":    os.path.join("ecc",f"rgh13_falcon_{gpio_name}_1940.ecc"),
             "imagetype": ImageType.GLITCH3,
-            "cbb":       '1940',
+            "cbb":       '1940' if use_ipc is False else '1940_ipc',
+            "cbx":       'cbx' if use_ipc is False else 'cby'
         },
         f"falcon_{gpio_name}" : {
             "nandtype":  NandType.NAND_16M,
             "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
             "output":    os.path.join("ecc",f"rgh13_falcon_{gpio_name}.ecc"),
             "imagetype": ImageType.GLITCH3,
-            "cbb":       '5772',
+            "cbb":       '5772' if use_ipc is False else '5772_ipc',
+            "cbx":       'cbx' if use_ipc is False else 'cby'
         },
         f"badfalcon_{gpio_name}" : {
             "nandtype":  NandType.NAND_16M,
             "smc":       os.path.join("smc","build",f"rgh13_badjasper_for_falcon_{gpio_name}.bin"),
             "output":    os.path.join("ecc",f"rgh13_badfalcon_{gpio_name}.ecc"),
             "imagetype": ImageType.GLITCH3,
-            "cbb":       '5772',
+            "cbb":       '5772' if use_ipc is False else '5772_ipc',
+            "cbx":       'cbx' if use_ipc is False else 'cby'
         },
         f"zephyr_{gpio_name}" : {
             "nandtype":  NandType.NAND_16M,
-            "smc":       os.path.join("smc","build",f"rgh13_jasper_for_falcon_{gpio_name}.bin"),
+            "smc":       os.path.join("smc","build",f"rgh13_jasper_for_zephyr_{gpio_name}.bin"),
             "output":    os.path.join("ecc",f"rgh13_zephyr_{gpio_name}.ecc"),
             "imagetype": ImageType.GLITCH3,
-            "cbb":       '4577',
+            "cbb":       '4577' if use_ipc is False else '4577_ipc',
+            "cbx":       'cbx' if use_ipc is False else 'cby'
         },
         f"badzephyr_{gpio_name}" : {
             "nandtype":  NandType.NAND_16M,
-            "smc":       os.path.join("smc","build",f"rgh13_badjasper_for_falcon_{gpio_name}.bin"),
+            "smc":       os.path.join("smc","build",f"rgh13_badjasper_for_zephyr_{gpio_name}.bin"),
             "output":    os.path.join("ecc",f"rgh13_badzephyr_{gpio_name}.ecc"),
             "imagetype": ImageType.GLITCH3,
-            "cbb":       '4577',
+            "cbb":       '4577' if use_ipc is False else '4577_ipc',
+            "cbx":       'cbx' if use_ipc is False else 'cby'
         },
-
         f"jasper_{gpio_name}" : {
             "nandtype": NandType.NAND_16M_JASPER,
             "smc":      os.path.join("smc","build",f"rgh13_jasper_{gpio_name}.bin"),
             "output":   os.path.join("ecc",f"rgh13_jasper_{gpio_name}.ecc"),
             "imagetype": ImageType.GLITCH3,
-            "cbb":      '6752',
+            "cbb":       '6752' if use_ipc is False else '6752_ipc',
+            "cbx":       'cbx' if use_ipc is False else 'cby'
         },
         f"badjasper_{gpio_name}": {
             "nandtype":  NandType.NAND_16M_JASPER,
             "smc":       os.path.join("smc","build",f"rgh13_badjasper_{gpio_name}.bin"),
             "output":    os.path.join("ecc",f"rgh13_badjasper_{gpio_name}.ecc"),
             "imagetype": ImageType.GLITCH3,
-            "cbb":       '6752'
+            "cbb":       '6752' if use_ipc is False else '6752_ipc',
+            "cbx":       'cbx' if use_ipc is False else 'cby'
         }
     }
 
@@ -189,14 +195,14 @@ XELL_TARGETS = {
     },
     "zephyr_tiltsw" : {
         "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon.bin"),
+        "smc":       os.path.join("smc","build","rgh13_jasper_for_zephyr.bin"),
         "output":    os.path.join("ecc","rgh13_zephyr_tiltsw.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '4577',
     },
     "badzephyr_tiltsw" : {
         "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon.bin"),
+        "smc":       os.path.join("smc","build","rgh13_badjasper_for_zephyr.bin"),
         "output":    os.path.join("ecc","rgh13_badzephyr_tiltsw.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '4577',
@@ -214,106 +220,6 @@ XELL_TARGETS = {
         "output":    os.path.join("ecc","rgh13_badjasper_tiltsw.ecc"),
         "imagetype": ImageType.GLITCH3,
         "cbb":       '6752'
-    },
-
-    "falcon_1wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_1wire.bin"),
-        "output":    os.path.join("ecc","rgh13_falcon_1wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '5772_ipc',
-        "cbx":       'cby'
-    },
-    "badfalcon_1wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_1wire.bin"),
-        "output":    os.path.join("ecc","rgh13_badfalcon_1wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '5772_ipc',
-        "cbx":       'cby'
-    },
-    
-    "zephyr_1wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_1wire.bin"),
-        "output":    os.path.join("ecc","rgh13_zephyr_1wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '4577_ipc',
-        "cbx":       'cby'
-    },
-    "badzephyr_1wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_1wire.bin"),
-        "output":    os.path.join("ecc","rgh13_badzephyr_1wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '4577_ipc',
-        "cbx":       'cby'
-    },
-
-    "falcon_0wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_0wire.bin"),
-        "output":    os.path.join("ecc","rgh13_falcon_0wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '5772_ipc',
-        "cbx":       'cby'
-    },
-    "badfalcon_0wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_0wire.bin"),
-        "output":    os.path.join("ecc","rgh13_badfalcon_0wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '5772_ipc',
-        "cbx":       'cby'
-    },
-
-    "zephyr_0wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_for_falcon_0wire.bin"),
-        "output":    os.path.join("ecc","rgh13_zephyr_0wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '4577_ipc',
-        "cbx":       'cby'
-    },
-    "badzephyr_0wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badjasper_for_falcon_0wire.bin"),
-        "output":    os.path.join("ecc","rgh13_badzephyr_0wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '4577_ipc',
-        "cbx":       'cby'
-    },
-    "jasper_1wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_1wire.bin"),
-        "output":    os.path.join("ecc","rgh13_jasper_1wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '6752_ipc',
-        "cbx":       'cby'
-    },
-    "badjasper_1wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badjasper_1wire.bin"),
-        "output":    os.path.join("ecc","rgh13_badjasper_1wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '6752_ipc',
-        "cbx":       'cby'
-    },
-    "jasper_0wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_jasper_0wire.bin"),
-        "output":    os.path.join("ecc","rgh13_jasper_0wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '6752_ipc',
-        "cbx":       'cby'
-    },
-    "badjasper_0wire" : {
-        "nandtype":  NandType.NAND_16M,
-        "smc":       os.path.join("smc","build","rgh13_badjasper_0wire.bin"),
-        "output":    os.path.join("ecc","rgh13_badjasper_0wire.ecc"),
-        "imagetype": ImageType.GLITCH3,
-        "cbb":       '6752_ipc',
-        "cbx":       'cby'
     },
 
     "xenon" : {
@@ -393,6 +299,8 @@ XELL_TARGETS = {
 
 XELL_TARGETS.update(_permutate_zfj_targets("extpwr"))
 XELL_TARGETS.update(_permutate_zfj_targets("chkstop"))
+XELL_TARGETS.update(_permutate_zfj_targets("0wire", use_ipc=True))
+XELL_TARGETS.update(_permutate_zfj_targets("1wire", use_ipc=True))
 
 def _load_and_patch_cb(cb_prefix: str) -> bytes:
     cb = None

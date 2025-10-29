@@ -281,6 +281,7 @@ Some idiot threw this together in an afternoon. Here are people whose work it wa
 - Mena for also being a chill guy
 - jnftech for the wonderful PCB images
 - Nadaman for the fancy ConsoleMods.org-themed XeLL
+- danders0n12 for a lot of help testing on Jasper and Zephyr boards
 
 ## License
 

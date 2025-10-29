@@ -106,16 +106,33 @@ def _permutate_jasper_targets(gpio_name: str, base_args: list):
                 '-D','JASPER_FOR_FALCON=1',
                 '-D','HARD_RESET_ON_CBA_FAIL=1'
             ]
+        },
+        'rgh13_jasper_for_zephyr': {
+            "additional_args": [
+                '-D','JASPER_FOR_FALCON=1',
+                '-D','ZEPHYR=1'
+            ]
+        },
+        'rgh13_badjasper_for_zephyr': {
+            "additional_args": [
+                '-D','JASPER_FOR_FALCON=1',
+                '-D','HARD_RESET_ON_CBA_FAIL=1',
+                '-D','ZEPHYR=1'
+            ]
         }
     }
 
+    asm_name = "rgh13_jasper.s" if gpio_name not in [ '0wire', '1wire' ] else f"rgh13_{gpio_name}_jasper.s"
     targets = {}
     for target_name,target_params in target_templates.items():
+        overlay_name = f"{target_name}_{gpio_name}_overlay.bin" if gpio_name != "tiltsw" else f"{target_name}_overlay.bin"
+        output_name = f"{target_name}_{gpio_name}.bin" if gpio_name != "tiltsw" else f"{target_name}.bin"
+        
         targets[f"{target_name}_{gpio_name}"] = {
             "clean_smc_name": "jasper_clean.bin",          
-            "asm_name": "rgh13_jasper.s",
-            "overlay_name": f"{target_name}_{gpio_name}_overlay.bin",
-            "output": f"{target_name}_{gpio_name}.bin",
+            "asm_name": asm_name,
+            "overlay_name": overlay_name,
+            "output": output_name,
             "additional_args": target_params["additional_args"] + base_args
         }
 
@@ -123,67 +140,6 @@ def _permutate_jasper_targets(gpio_name: str, base_args: list):
 
 
 SMC_TARGETS = {
-    "falcon_rgh13" : {
-        "clean_smc_name": "falcon_clean.bin",            
-        "asm_name": "rgh13_falcon.s",              
-        "overlay_name": "rgh13_falcon_overlay.bin",
-        "output": "rgh13_falcon.bin"
-    },
-
-    "badfalcon_rgh13" : {
-        "clean_smc_name": "falcon_clean.bin",            
-        "asm_name": "rgh13_falcon.s",              
-        "overlay_name": "rgh13_badfalcon_overlay.bin",
-        "output": "rgh13_badfalcon.bin",
-        "additional_args": [
-            '-D','HARD_RESET_ON_CBA_FAIL=1'
-        ]
-    },
-
-    "jasper_rgh13" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper.s",              
-        "overlay_name": "rgh13_jasper_overlay.bin",
-        "output": "rgh13_jasper.bin",
-        "additional_args": [
-            '-D','POST7_TILTSW=1'
-        ]
-    },
-
-    "badjasper_rgh13" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper.s",              
-        "overlay_name": "rgh13_badjasper_overlay.bin",
-        "output": "rgh13_badjasper.bin",
-        "additional_args": [
-            '-D','POST7_TILTSW=1',
-            '-D','HARD_RESET_ON_CBA_FAIL=1'
-        ]
-    },
-
-    "jasper_for_falcon_rgh13" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper.s",              
-        "overlay_name": "rgh13_jasper_for_falcon_overlay.bin",
-        "output": "rgh13_jasper_for_falcon.bin",
-        "additional_args": [
-            '-D','JASPER_FOR_FALCON=1',
-            '-D','POST7_TILTSW=1'
-        ]
-    },
-
-    "badjasper_for_falcon_rgh13" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_jasper.s",              
-        "overlay_name": "rgh13_badjasper_for_falcon_overlay.bin",
-        "output": "rgh13_badjasper_for_falcon.bin",
-        "additional_args": [
-            '-D','HARD_RESET_ON_CBA_FAIL=1',
-            '-D','JASPER_FOR_FALCON=1',
-            '-D','POST7_TILTSW=1'
-        ]
-    },
-
     "xenon": {
         "clean_smc_name": "xenon_clean.bin",
         "asm_name": "rgh13_xenon.s",
@@ -205,84 +161,14 @@ SMC_TARGETS = {
         "output": "rgh13_xenon_0wire.bin"
     },
 
-    "jasper_for_falcon_rgh13_1wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_1wire_jasper.s",              
-        "overlay_name": "rgh13_jasper_for_falcon_1wire_overlay.bin",
-        "output": "rgh13_jasper_for_falcon_1wire.bin",
-        "additional_args": [
-            '-D','JASPER_FOR_FALCON=1'
-        ]
-    },
-
-    "jasper_rgh13_1wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_1wire_jasper.s",              
-        "overlay_name": "rgh13_jasper_1wire_overlay.bin",
-        "output": "rgh13_jasper_1wire.bin",
-    },
-
-    "badjasper_for_falcon_rgh13_1wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_1wire_jasper.s",              
-        "overlay_name": "rgh13_badjasper_for_falcon_1wire_overlay.bin",
-        "output": "rgh13_badjasper_for_falcon_1wire.bin",
-        "additional_args": [
-            '-D','JASPER_FOR_FALCON=1',
-            '-D','HARD_RESET_ON_CBA_FAIL=1'
-        ]
-    },
-
-    "badjasper_rgh13_1wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_1wire_jasper.s",              
-        "overlay_name": "rgh13_badjasper_1wire_overlay.bin",
-        "output": "rgh13_badjasper_1wire.bin",
-        "additional_args": [
-            '-D','HARD_RESET_ON_CBA_FAIL=1'
-        ]
-    },
-
-    "jasper_for_falcon_rgh13_0wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_0wire_jasper.s",              
-        "overlay_name": "rgh13_jasper_for_falcon_0wire_overlay.bin",
-        "output": "rgh13_jasper_for_falcon_0wire.bin",
-        "additional_args": [
-            '-D','JASPER_FOR_FALCON=1'
-        ]
-    },
-    "jasper_rgh13_0wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_0wire_jasper.s",              
-        "overlay_name": "rgh13_jasper_0wire_overlay.bin",
-        "output": "rgh13_jasper_0wire.bin",
-    },
-
-    "badjasper_for_falcon_rgh13_0wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_0wire_jasper.s",              
-        "overlay_name": "rgh13_badjasper_for_falcon_0wire_overlay.bin",
-        "output": "rgh13_badjasper_for_falcon_0wire.bin",
-        "additional_args": [
-            '-D','JASPER_FOR_FALCON=1',
-            '-D','HARD_RESET_ON_CBA_FAIL=1',
-        ]
-    },
-    "badjasper_rgh13_0wire" : {
-        "clean_smc_name": "jasper_clean.bin",            
-        "asm_name": "rgh13_0wire_jasper.s",              
-        "overlay_name": "rgh13_badjasper_0wire_overlay.bin",
-        "output": "rgh13_badjasper_0wire.bin",
-        "additional_args": [
-            '-D','HARD_RESET_ON_CBA_FAIL=1',
-        ]
-    },
 }
 
-#SMC_TARGETS.update(_permutate_jasper_targets("tiltsw",['-D','POST7_TILTSW=1']))
+SMC_TARGETS.update(_permutate_jasper_targets("tiltsw",['-D','POST7_TILTSW=1']))
 SMC_TARGETS.update(_permutate_jasper_targets("extpwr",['-D','POST7_EXTPWR=1']))
 SMC_TARGETS.update(_permutate_jasper_targets("chkstop",['-D','POST7_CHKSTOP=1']))
+SMC_TARGETS.update(_permutate_jasper_targets("1wire",[]))
+SMC_TARGETS.update(_permutate_jasper_targets("0wire",[]))
+
 
 def main():
     # find c51asm - MUST be an absolute path
