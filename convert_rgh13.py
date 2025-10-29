@@ -101,39 +101,39 @@ SMC_FILEPATH_MAP = {
 
     'falcon_tiltsw': os.path.join("smc", "build", "rgh13_jasper_for_falcon.bin"),
     'badfalcon_tiltsw': os.path.join("smc", "build", "rgh13_badjasper_for_falcon.bin"),
-    'zephyr_tiltsw': os.path.join("smc", "build", "rgh13_jasper_for_falcon.bin"),
-    'badzephyr_tiltsw': os.path.join("smc", "build", "rgh13_badjasper_for_falcon.bin"),
+    'zephyr_tiltsw': os.path.join("smc", "build", "rgh13_jasper_for_zephyr.bin"),
+    'badzephyr_tiltsw': os.path.join("smc", "build", "rgh13_badjasper_for_zephyr.bin"),
     'jasper_tiltsw': os.path.join("smc", "build", "rgh13_jasper.bin"),
     'badjasper_tiltsw': os.path.join("smc", "build", "rgh13_badjasper.bin"),
 
     'falcon_extpwr': os.path.join("smc", "build", "rgh13_jasper_for_falcon_extpwr.bin"),
     'badfalcon_extpwr': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_extpwr.bin"),
-    'zephyr_extpwr': os.path.join("smc", "build", "rgh13_jasper_for_falcon_extpwr.bin"),
-    'badzephyr_extpwr': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_extpwr.bin"),
+    'zephyr_extpwr': os.path.join("smc", "build", "rgh13_jasper_for_zephyr_extpwr.bin"),
+    'badzephyr_extpwr': os.path.join("smc", "build", "rgh13_badjasper_for_zephyr_extpwr.bin"),
     'jasper_extpwr': os.path.join("smc", "build", "rgh13_jasper_extpwr.bin"),
     'badjasper_extpwr': os.path.join("smc", "build", "rgh13_badjasper_extpwr.bin"),
 
     'falcon_chkstop': os.path.join("smc", "build", "rgh13_jasper_for_falcon_chkstop.bin"),
     'badfalcon_chkstop': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_chkstop.bin"),
-    'zephyr_chkstop': os.path.join("smc", "build", "rgh13_jasper_for_falcon_chkstop.bin"),
-    'badzephyr_chkstop': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_chkstop.bin"),
+    'zephyr_chkstop': os.path.join("smc", "build", "rgh13_jasper_for_zephyr_chkstop.bin"),
+    'badzephyr_chkstop': os.path.join("smc", "build", "rgh13_badjasper_for_zephyr_chkstop.bin"),
     'jasper_chkstop': os.path.join("smc", "build", "rgh13_jasper_chkstop.bin"),
     'badjasper_chkstop': os.path.join("smc", "build", "rgh13_badjasper_chkstop.bin"),
 
     'xenon_1wire':  os.path.join("smc", "build", "rgh13_xenon_1wire.bin"),
     'falcon_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin"),
-    'zephyr_1wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_1wire.bin"),
+    'zephyr_1wire': os.path.join("smc", "build", "rgh13_jasper_for_zephyr_1wire.bin"),
     'jasper_1wire': os.path.join("smc", "build", "rgh13_jasper_1wire.bin"),
     'badfalcon_1wire': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_1wire.bin"),
-    'badzephyr_1wire': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_1wire.bin"),
+    'badzephyr_1wire': os.path.join("smc", "build", "rgh13_badjasper_for_zephyr_1wire.bin"),
     'badjasper_1wire': os.path.join("smc", "build", "rgh13_badjasper_1wire.bin"),
 
     'xenon_0wire':  os.path.join("smc", "build", "rgh13_xenon_0wire.bin"),
     'falcon_0wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_0wire.bin"),
-    'zephyr_0wire': os.path.join("smc", "build", "rgh13_jasper_for_falcon_0wire.bin"),
+    'zephyr_0wire': os.path.join("smc", "build", "rgh13_jasper_for_zephyr_0wire.bin"),
     'jasper_0wire': os.path.join("smc", "build", "rgh13_jasper_0wire.bin"),
     'badfalcon_0wire': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_0wire.bin"),
-    'badzephyr_0wire': os.path.join("smc", "build", "rgh13_badjasper_for_falcon_0wire.bin"),
+    'badzephyr_0wire': os.path.join("smc", "build", "rgh13_badjasper_for_zephyr_0wire.bin"),
     'badjasper_0wire': os.path.join("smc", "build", "rgh13_badjasper_0wire.bin"),
 }
 
@@ -152,10 +152,10 @@ decrypt_cbb = encrypt_cbb
 
 def _load_and_patch_cb(cb_prefix: str) -> bytes:
     cb = None
-    with open(os.path.join("cbb", f"{cb}_clean.bin"),"rb") as f:
+    with open(os.path.join("cbb", f"{cb_prefix}_clean.bin"),"rb") as f:
         cb = f.read()
     patch = None
-    with open(os.path.join("xebuild", f"{cb}_xebuild.bin"), "rb") as f:
+    with open(os.path.join("xebuild", f"{cb_prefix}_xebuild.bin"), "rb") as f:
         patch = f.read()
 
     return xebuild_apply_cb_patch(cb, patch)
@@ -197,6 +197,19 @@ def _extract_loaders(nand_stripped: bytes) -> dict:
         else:
             print(f"unrecognized loader type encountered: 0x{loader_type_raw:02x}")
         pos += loader_size
+
+# for SMC checksum/HMAC recalc
+def _calc_mystery_seeds(cbb: bytes):
+    offset = 2
+    seeds = []
+    while True:
+        read_offs = offset << 3
+        seeds.append(struct.unpack(">Q",cbb[read_offs:read_offs+8])[0])
+        offset += 0x40
+        if offset >= 0x300:
+            break
+
+    return seeds
 
 def main():
     argparser = _init_argparser()
@@ -319,6 +332,7 @@ def main():
     else:
         cbb = loaders['cbb']     # Glitch3 already has that in plaintext
 
+
     cbb_version = struct.unpack(">H",cbb[2:4])[0]
     cbb_size = struct.unpack(">I", cbb[0x0C:0x10])[0]
 
@@ -330,7 +344,7 @@ def main():
 
     if cbb_version == 4577 and cbb_hash == SHA1_CBB_4577_XEBUILD:
         print("found xeBuild-patched Zephyr CB_B")
-        smctype = "zephyr"  
+        smctype = "zephyr"
     elif cbb_version == 5772 and cbb_hash == SHA1_CBB_5772_XEBUILD:
         print("found xeBuild-patched Falcon CB_B")
 
@@ -482,7 +496,7 @@ def main():
         patchfile = os.path.join("patches",  f"cbb_{cbb_version}_{'very' if args.veryfast5050 else ''}fast5050.bin")
         if os.path.exists(patchfile):
             cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched, patchfile)
-        
+
     new_loader_buffer += cbb_patched
     new_loader_buffer += loaders['cd']
     new_loader_buffer += loaders['ce']
