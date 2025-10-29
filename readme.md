@@ -161,10 +161,11 @@ The converter script supports both, but **you will need to specify your CPU key 
 
 Once your image is built, **don't flash it immediately**. You need to write some crap on the commandline.
 
-Running `python3 convert_rgh3.py --help` gets you the usage, but the basic usage is:
+Running `python3 convert_rgh13.py --help` gets you the usage, but the basic usage is:
 
-- For Glitch2, you need to specify your CPU key: `python3 convert_rgh3.py --board xenon --cpukey ...your cpukey... path/to/updflash.bin`
-- For RGH3, specifying your CPU key is recommended, but optional: `python3 convert_rgh3.py --board xenon path/to/updflash.bin`
+- For Glitch2, you need to specify your CPU key: `python3 convert_rgh13.py --board xenon --cpukey ...your cpukey... path/to/updflash.bin`
+- For RGH3, specifying your CPU key is recommended, but optional: `python3 convert_rgh13.py --board xenon path/to/updflash.bin`
+- You can also pass the path to the directory containing both the CPU key and updflash.bin: `python3 convert_rgh13.bin --board falcon C:\jrunner\601420696969`
 
 You will also need to specify your method so the right SMC is used:
 - Xenon/Elpis: If you don't specify anything, the default is two-wire. Also supports `--zerowire` and `--onewire`

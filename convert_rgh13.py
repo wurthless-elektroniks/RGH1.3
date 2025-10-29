@@ -205,9 +205,43 @@ def main():
         print("invalid usage - must specify path to updflash.bin")
         print("run with --help for more options")
         return
+    
+    if os.path.exists(args.updflash) is False:
+        print(f"error: no such file: {args.updflash}")
+        return
+    
+    cpukey = None
+
+    if os.path.isdir(args.updflash):
+        print(f"{args.updflash}: is a directory, checking inside for updflash.bin and cpukey.txt")
+
+        flash_path = os.path.join(args.updflash, "updflash.bin")
+        if os.path.exists(flash_path) is False:
+            print("error: directory does not contain updflash.bin")
+            return
+        
+        cpukey_path = os.path.join(args.updflash,"cpukey.txt")
+        if os.path.exists(cpukey_path):
+            print("found cpukey.txt, checking it...")
+            if os.path.getsize(cpukey_path) != 32:
+                print("error: cpukey.txt is not the right size (should be 32 bytes)")
+                return
+            
+            cpukey_contents = None
+            with open(cpukey_path, "rb") as f:
+                cpukey_contents = f.read()
+
+            cpukey = _parse_cpukey(cpukey_contents.decode('utf8'))
+            print(f"cpukey.txt loaded OK, overriding CPU key with: {cpukey.hex()}")
+        else:
+            print("WARNING: cpukey.txt not found in directory, continuing anyway")
+
+    else:
+        flash_path = args.updflash
+        cpukey = args.cpukey
 
     nand = None
-    with open(args.updflash, "rb") as f:
+    with open(flash_path, "rb") as f:
         nand = f.read()
 
     nand_type = ecc.ecc_detect_type(nand)
@@ -266,7 +300,7 @@ def main():
         print("found glitch3/RGH3 image")
         imagetype = 3
     elif 'cbb' in loaders:
-        if args.cpukey is None:
+        if cpukey is None:
             print("error: glitch2 image detected - you must specify CPU key")
             return
         print("found glitch2/RGH1.2 image")
@@ -278,7 +312,7 @@ def main():
     cba_seed = loaders['cba'][0x10:0x20]
     cba_key, _ = decrypt_cba(loaders['cba'], rnd=cba_seed)
     if imagetype == 2:
-        cbb_key, cbb = decrypt_cbb(loaders['cbb'], cba_key, loaders['cbb'][0x10:0x20], cpu_key=args.cpukey)
+        cbb_key, cbb = decrypt_cbb(loaders['cbb'], cba_key, loaders['cbb'][0x10:0x20], cpu_key=cpukey)
 
         # put proper decryption key in place or else CD will not decrypt correctly
         cbb[0x10:0x20] = cbb_key
@@ -380,7 +414,7 @@ def main():
 
     # replace whatever CB_A is there with the 9188 MFG image
     new_cba = None
-    cba_file = "cba_9188_mfg.bin" if args.cpukey is None else "cba_5772.bin"
+    cba_file = "cba_9188_mfg.bin" if cpukey is None else "cba_5772.bin"
     with open(os.path.join("cba", cba_file), "rb") as f:
         new_cba = f.read()
     print(f"loaded CB_A from file: {cba_file}")
@@ -406,10 +440,10 @@ def main():
 
     print(f"loaded CB_X/CB_Y from file: {cbx_file}")
 
-    if args.cpukey is None:
+    if cpukey is None:
         _, cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed)
     else:
-        _, cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed, cpu_key=args.cpukey)
+        _, cby_encrypted = encrypt_cbb(new_cbx, cba_key, rnd=cbx_seed, cpu_key=cpukey)
 
     new_loader_buffer += cby_encrypted
 
@@ -469,7 +503,7 @@ def main():
     nand[0:len(nand_stripped_ecc)] = nand_stripped_ecc
 
     print("writing final NAND...")
-    with open(args.updflash, "wb") as f:
+    with open(flash_path, "wb") as f:
         f.write(nand)
 
     print("converted to RGH1.3 successfully, happy flashing")
