@@ -5,7 +5,7 @@ import hmac
 import re
 from argparse import ArgumentParser,RawTextHelpFormatter
 from enum import Enum
-from smc import encrypt_smc
+from smc import encrypt_smc, decrypt_smc
 from cbbpatch import rgh13cbb_do_patches
 from patcher import assemble_branch
 from xebuildpatch import xebuild_apply_cb_patch, xebuild_apply_cb_patch_from_file
@@ -14,15 +14,32 @@ import os
 
 from rc4 import RC4
 
+# Hashes for known SMC types. Hashes are of encrypted AND scrambled SMCs.
+#
 # RGH3 v1 uses the same SMC for Falcon and Jasper, likely because they're compatible
 # We expect these for all phat builds
 SHA1_FALCON_RGH3_27MHZ = "9b89a53dbdb4735782e92b70bb5e956f6b35da5f"
 SHA1_FALCON_RGH3_10MHZ = "a4ae6a6f1ff374739d1c91f8a2881f4eecc210d3"
 
+XENON_SMC_SHAS = [
+    "e0ad45093f0564c7500fbbcfc6dd957a54385fd1"
+]
+
+ZEPHYR_SMC_SHAS = [
+]
+
+FALCON_SMC_SHAS = [
+]
+
+JASPER_SMC_SHAS = [
+    "2ec1d5a2de41b0980d90e4d7c283587ccafa6f10"
+]
+
 SHA1_CBB_4577_XEBUILD = "a67690a35bcc6284c53933fed721b56abbde312b"
 SHA1_CBB_5772_XEBUILD = "3a8fb9580ce01cf1c0e2d885e0fd96a05571643f"
 SHA1_CBB_6752_XEBUILD = "899cd01e00ef7b27ceb010dde42e4d6e9c871330"
 SHA1_CBB_7378_ELPISS  = "9110a599e8f566e16635affeef4aeadf3c80efd5"
+
 
 def _parse_cpukey(cpu_key):
     CPUKEY_EXP = re.compile(r"^[0-9a-fA-F]{32}$")
@@ -211,6 +228,34 @@ def _calc_mystery_seeds(cbb: bytes):
 
     return seeds
 
+def _get_smc_type(smc_encrypted: bytes) -> dict:
+    smc_plaintext = decrypt_smc(smc_encrypted)
+
+    SMC_TARGET_CONSOLES = {
+        0x01: "xenon",
+        0x02: "zephyr",
+        0x03: "falcon",
+        0x04: "jasper",
+        0x05: "trinity",
+        0x06: "corona",
+        0x07: "winchester"
+    }
+
+    if smc_plaintext[0x10C:0x11C] != b"Copyright 2001-2":
+        print("WARNING: SMC looks invalid")
+        return None
+
+    target_console_and_revision = smc_plaintext[0x100]
+    program_major_version       = smc_plaintext[0x101]
+    program_minor_version       = smc_plaintext[0x102]
+    
+    target_console = (target_console_and_revision >> 4) & 0xF
+    return {
+        "type":      SMC_TARGET_CONSOLES[target_console] if target_console in SMC_TARGET_CONSOLES else f"invalid ({target_console})",
+        "revision":  target_console_and_revision & 0xF,
+        "version":   f"{program_major_version}.{program_minor_version:02d}"
+    }
+
 def main():
     argparser = _init_argparser()
     args = argparser.parse_args()
@@ -279,6 +324,10 @@ def main():
         return
 
     # get shasum of encrypted SMC - that will be enough to determine what it is
+    smc_type = _get_smc_type(nand_stripped[0x1000:0x4000])
+    if smc_type is None:
+        print("error: SMC doesn't look valid (should have copyright string at 0x10C)")
+    
     smc_hash = hashlib.sha1(nand_stripped[0x1000:0x4000])
     if smc_hash.hexdigest() == SHA1_FALCON_RGH3_27MHZ:
         print("found RGH3 v1 27 MHz SMC")
@@ -286,6 +335,8 @@ def main():
         print("found RGH3 v1 10 MHz SMC")
     else:
         print(f"WARNING: unrecognized SMC: {smc_hash.hexdigest()}")
+        print(f"SMC program identifies itself as {smc_type['type']} rev. {smc_type['revision']} (v{smc_type['version']})")
+        print("but this isn't really enough to identify the SMC as is. you might want to report the hash somewhere.")
 
     # detect XeLL position
     xell_pos = None
@@ -464,7 +515,8 @@ def main():
     # backup params now in case they get replaced
     cbb_params = cbb[0x10:0x40]
 
-    if args.keep_cb is False:
+    # disabled until CB replace bug is killed
+    if False: # args.keep_cb is False:
         '''
         if cbb_version == 5772 and args.board == "xenon":
             print("replacing xeBuild 5772 CB_B with 1940")
