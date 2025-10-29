@@ -173,8 +173,8 @@ You will also need to specify your method so the right SMC is used:
 
 **Important note about boards:**
 - If you are using a Samsung Elpis board, you will need to specify `--board elpis`
-- J-Runner's bad habit of building too many things with the Falcon loader will require you to specify `--board falcon` or `--board xenon`
-- Zephyr and Jasper will be autodetected, as will Elpis images that are already using the Elpis 7378 loader
+- J-Runner's bad habit of building too many things with the Falcon loader will require you to specify `--board falcon`, `--board xenon` or `--board zephyr`
+- Jasper will be autodetected, as will Elpis images that are already using the Elpis 7378 loader
 
 And don't forget to add `--badjasper` if your system needs the badjasper workaround.
 
