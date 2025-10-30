@@ -1,4 +1,4 @@
-# EXT+3 installation, Xenon and Elpis boards
+# EXT+3 installation, Xenon and Elpis boards, 2-wire and 1-wire methods
 
 ## An important note about southbridges
 
@@ -18,12 +18,14 @@ The glitch chip wiring is the same as EXT_CLK, but here it is again in case you'
 - C = STBY_CLK
 - F = CPU_EXT_CLK_EN
 
-You will also need two 22k ohm resistors and two 1N400x diodes, which are soldered to the debug LED
-port similar to how JTAG does it. The 22k resistors are used as pullups; without them, the SMC code won't
-be able to detect POST state changes. **If you try to run the SMC code without the pullups, you'll get a
+You will also need two resistors (10k-22k; 10k works better) and two 1N400x diodes, which are soldered to
+the debug LED port similar to how JTAG does it. The resistors are used as pullups; without them, the SMC
+code won't be able to detect POST state changes. **If you try to run the SMC code without the pullups, you'll get a
 RRoD.**
 
-First, solder the 22k pullups into the DBG_LED1 and DBG_LED2 holes, common one side of them together, and
+**If you are using the one-wire method, it is only necessary to connect DBG_LED2 to POST bit 7.** 
+
+First, solder the pullup resistors into the DBG_LED1 and DBG_LED2 holes, common one side of them together, and
 then route 3v3 to the commoned side. Here's an example of how that's done:
 
 ![](ext3_xenon_pullup_example.jpg)

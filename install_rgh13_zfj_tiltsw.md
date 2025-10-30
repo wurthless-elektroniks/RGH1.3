@@ -1,17 +1,19 @@
 # RGH1.3 installation, TILTSW for POST 7, Falcon/Jasper
 
 The tiltswitch RGH1.3 method was the first to be created. It requires you disable or remove the tiltswitch
-to reuse the tiltswitch line as an input for POST bit 7.
+to reuse the tiltswitch line as an input for POST bit 7. **It is not really recommended anymore due to its
+ugliness and the fact that there are far better methods now.**
 
 The tiltswitch was chosen because:
 - It's a line that's pulled up to 3v3 internally
 - It makes for slightly cleaner wire routing
 - It isn't externally accessible
 - If the tiltswitch is disabled by a trace cut, it can be reconnected later without much fuss
+- Tilt switch reads were far easier to spot in Ghidra as opposed to some of the other I/Os
+- I just wanted to get something working and to refine it later
 
 The downside is that you lose the tiltswitch's functionality, which, let's be honest, is just to orient
-the Ring of Light patterns differently if your console is standing up or lying down. It's not a major loss
-but I'd understand why some people would want to keep it.
+the Ring of Light patterns differently if your console is standing up or lying down.
 
 ## Installing
 

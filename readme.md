@@ -64,9 +64,16 @@ The two-wire POST methods are the oldest and probably the fastest. The code reli
 via the POST pins, and as such they require two POST diodes and occasionally some bodges.
 
 - [EXT+3 for Xenon/Elpis, 2-wire method](install_ext3_xenon.md)
+- [EXT+3 for Zephyr, chkstop method](install_ext3_zephyr_chkstop.md)
 - [RGH1.3 for Falcon/Jasper, chkstop method](install_rgh13_zfj_chkstop.md) (optimal balance between jank and functional)
-- [RGH1.3 for Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (cleaner, but more annoying)
-- [RGH1.3 for Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (jankier, but easier)
+- [RGH1.3 for Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (**not recommended for new installs**)
+- [RGH1.3 for Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (**not recommended for new installs**)
+
+**IMPORTANT:** If you are using two-wire installs on Zephyr, Falcon or Jasper, it is STRONGLY recommended to use the
+chkstop method for new installs, and to convert old installs to chkstop where possible. The other ones are still
+supported only for people who installed them and are too lazy to convert their systems to the newer methods (i.e., me).
+If the community decides to adopt RGH1.3 and integrate it into other tools, there is a chance that the extpwr and
+tiltswitch methods will not be widely supported.
 
 ### Zero-wire POST method
 

@@ -3,8 +3,13 @@
 The extpwr method for RGH1.3 is an alternative method for people who don't want to hack up their
 boards or lose the tiltswitch functionality. It uses the little-used /EXT_PWR_ON_N signal, which is
 normally used by kiosks and debug tools to power the system up instead of the front panel buttons.
-However, it is more annoying to install because the wire routing isn't ideal and because the SMC
-will power the system on automatically unless you've flashed the right SMC program.
+
+This method was the second to be created after the tiltswitch method. **It is no longer recommended**,
+for the following reasons:
+- If you connect the test point to the POST pin, the SMC will power the system on automatically unless
+  you've flashed the right SMC program
+- There's too much noise on that I/O line which results in unreliable boot progress tracking
+- There are far better methods (checkstop is best for two-wire nowadays, 1/0-wire also work well)
 
 ## The important bit: Flash BEFORE you wire things up!
 
