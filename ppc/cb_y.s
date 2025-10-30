@@ -104,7 +104,7 @@ _load_cbb_loop:
 
     # let SMC know that CB_B is about to run
     oris       %r7,%r7,0xEA00     # point r3 at southbridge
-    lis        %r2,0x4000
+    lis        %r2,0x0400
     stw        %r2,0x1084(%r7)    # grab FIFO
     lis        %r2,0xA100
     stw        %r2,0x1080(%r7)    # send IPC command 0xA1
