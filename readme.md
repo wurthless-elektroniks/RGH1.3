@@ -99,6 +99,15 @@ Documentation is still to be written but the basic installation with the diode i
 - Xenon/Elpis: Same as 2-wire, but connect POST 7 only
 - Zephyr/Falcon/Jasper: Connect POST 7 to GPU_RESET_DONE
 
+### Using a Raspberry Pi Pico or other RP2040-based device
+
+RGH1.3 was created with the intent of speeding up glitch attempts on the Pico so it's only natural that
+Picos are supported. **Using a Pico doesn't produce results as good as a glitch chip** because the
+Pico is unable to run in sync with the standby clock, **and it's kinda dangerous** because you're interfacing
+3v3 to a 1v1 device. That said, it works well enough that you can throw one into a Falcon.
+
+- [RGH1.3 Pico installation, Falcon/Jasper boards](install_rgh13_pico_fj.md)
+
 ## Flashing XeLL
 
 ⚠️ **ALWAYS back up your NAND first! You will lose your keyvault if you're not careful!** ⚠️

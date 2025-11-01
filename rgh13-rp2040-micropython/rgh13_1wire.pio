@@ -1,0 +1,82 @@
+;
+; RGH 1.3 implementation in PIO assembly, single wire edition
+; Based largely on Octal450's timing files and RGH3 by 15432
+;
+; SET pin bits:
+; bit 0 = PLL
+; bit 1 = reset (set as input, pulled low when set as output)
+;
+; Input pin bits:
+; Bit 0 = POST bit 1 (NOT bit 0)
+;
+
+.program rgh12
+    ; grab parameters before execution
+    pull noblock
+    mov x,osr
+    pull noblock
+    mov y,osr
+
+    ; this bit takes up a lot of space
+    ; but thankfully it and the rest of the program just barely fit in the PIO
+    wait 1 pin 0 ; wait for POST 0x12
+    wait 0 pin 0 ; wait for POST 0x14
+    wait 1 pin 0 ; wait for POST 0x16
+    wait 0 pin 0 ; wait for POST 0x18
+    wait 1 pin 0 ; wait for POST 0x1A
+    wait 0 pin 0 ; wait for POST 0x1C
+    wait 1 pin 0 ; wait for POST 0x1E
+    wait 0 pin 0 ; wait for POST 0xD0
+    wait 1 pin 0 ; wait for POST 0xD2
+    wait 0 pin 0 ; wait for POST 0xD4
+    wait 1 pin 0 ; wait for POST 0xD6
+    wait 0 pin 0 ; wait for POST 0xD8
+
+pll_assert_delay:
+    jmp x--, pll_assert_delay
+    set pins,1                  ; assert CPU_PLL_BYPASS 
+    
+    wait 1 pin 0                ; wait for POST 0xDA
+reset_delay:
+    jmp y--, reset_delay        ; then delay until it's time to send the /RESET pulse
+    
+    ; strobe /RESET
+    set pindirs,3 [1]  ; pulse /RESET low for 2 cycles (should be enough)
+
+    set pins,3         ; pull /RESET high instead of letting it drift upward.
+                       ; DANGER - this is interfacing 3v3 to a 1v1 line.
+                       ; the longer this is on, the more damage you'll cause to your CPU.
+                       ; to be safe, clamp the reset line with double diodes or a zener.
+
+    set pindirs,1      ; set /RESET back to input
+
+    ; Per Octal450: while it's possible to release CPU_PLL_BYPASS instantly
+    ; it radically increases the chance that the CPU will crash.
+    ; RGH1.2 V2 (and EXT_CLK) use 50k cycles delay.
+    ;
+    ; Timings were calculated using NathanY3G's PIO simulator
+    ; See https://github.com/NathanY3G/rp2040-pio-emulator
+
+    ; delay 49184 cycles
+    set y,31 [31]
+pll_deasert_wait_0:
+    set x,31 [31]
+pll_deasert_wait_1:
+    nop [13]
+    jmp x--,pll_deasert_wait_1 [31]
+    jmp y--,pll_deasert_wait_0 [31]
+
+    ; delay rest of the way to 50k.
+    ; 31x24 loops below get us to around 49986,
+    ; so the set instruction delay lands us at 50k precisely
+    set x,24 [14]
+pll_deassert_wait_2:
+    jmp x--,pll_deassert_wait_2 [31]
+
+    ; deassert CPU_PLL_BYPASS
+    set pins,0
+
+    ; spin forever
+    .wrap_target
+    nop
+    .wrap
