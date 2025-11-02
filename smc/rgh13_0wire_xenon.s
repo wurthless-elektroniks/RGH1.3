@@ -79,9 +79,6 @@ g_power_up_cause_backup                 equ VARBASE-1
     mov dptr,#avpack_reroute_2_start
     mov dptr,#avpack_reroute_2_end
 
-    mov dptr,#dbgled_readfcn_stubout_start
-    mov dptr,#dbgled_readfcn_stubout_end
-
     mov dptr,#rgh13_common_code_start
     mov dptr,#rgh13_common_code_end
 
@@ -180,12 +177,9 @@ powerup_reroute_start:
     nop
 powerup_reroute_end:
 
+    .org 0x2DAA
+rgh13_common_code_start:
 
-    ; 0x224E: reads dbg leds
-    ; 2-wire needed this stubbed out, we keep this patch to store the avpack reroute
-    .org 0x224E
-dbgled_readfcn_stubout_start:
-    ret
 
 ; quality of life improvement: if no avpack present, pretend a composite cable
 ; is plugged in, so the system can boot headless without flashing the four red lights
@@ -205,12 +199,6 @@ avpack_detect_reroute:
 _avpack_is_present:
     pop acc
     ret
-
-dbgled_readfcn_stubout_end:
-
-    .org 0x2DAA
-rgh13_common_code_start:
-
 
 cpu_reset_handler:
     lcall on_reset_watchdog_deassert_cpu_reset
