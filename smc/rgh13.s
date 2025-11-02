@@ -111,7 +111,6 @@ turboreset_sm_exec:
     jb  g_requesting_reset,_turboreset_sm_disarm
 
     ; also cut the state machine off if RRoD raised
-    jb g_force_rrod_3,_turboreset_sm_disarm
     jb g_force_rrod_4,_turboreset_sm_disarm
     jb g_force_rrod_ipc,_turboreset_sm_disarm
 
@@ -153,7 +152,6 @@ _setup_rrod:
     mov r0,#g_rol_af_cell
     mov @r0,g_rrod_base_error_pattern
 
-    setb g_force_rrod_3        ; forces immediate power down
     setb g_force_rrod_4
     setb g_force_rrod_ipc
     setb g_rol_update_pending

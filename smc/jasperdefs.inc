@@ -15,7 +15,7 @@ g_powerdown_sm_should_run               equ 022h.0
 g_has_getpowerupcause_arrived           equ 022h.3
 
 ; these flags all trigger RRoD
-g_force_rrod_3                          equ 023h.3
+g_force_rrod_3                          equ 023h.3 ; checkstop active (falcon/jasper)
 g_force_rrod_4                          equ 023h.4 ; raised if there's a power problem
 g_force_rrod_ipc                        equ 023h.6 ; from IPC, also set by reset watchdog
 

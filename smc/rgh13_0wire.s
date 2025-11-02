@@ -60,7 +60,6 @@ turboreset_sm_exec:
     jb  g_requesting_reset,_turboreset_sm_disarm
 
     ; also cut the state machine off if RRoD raised
-    jb g_force_rrod_3,_turboreset_sm_disarm
     jb g_force_rrod_4,_turboreset_sm_disarm
     jb g_force_rrod_ipc,_turboreset_sm_disarm
 

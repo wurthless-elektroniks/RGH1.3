@@ -21,7 +21,7 @@ g_rrod_base_error_pattern equ 05Ch
 g_power_up_cause equ 062h
 
 ; these flags all trigger RRoD
-g_force_rrod_3                          equ 023h.3
+g_force_rrod_3                          equ 023h.3 ; checkstop active (falcon/jasper)
 g_force_rrod_4                          equ 023h.4 ; raised if there's a power problem
 g_force_rrod_ipc                        equ 023h.6 ; from IPC, also set by reset watchdog
 

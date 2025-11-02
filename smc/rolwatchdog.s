@@ -44,7 +44,6 @@ led_lightshow_sm_exec:
 _led_lightshow_sm_do_state_1:
     ; for all "active" states:
     ; cut the state machine off if RRoD raised
-    jb g_force_rrod_3,_led_lightshow_sm_clear_leds_and_go_idle
     jb g_force_rrod_4,_led_lightshow_sm_clear_leds_and_go_idle
     jb g_force_rrod_ipc,_led_lightshow_sm_clear_leds_and_go_idle
 
