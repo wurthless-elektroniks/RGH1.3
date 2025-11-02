@@ -12,7 +12,7 @@ from rp2 import PIO
 #
 # ------------------------------------------------------------------------
 
-RESET_DELAY            = 349821  # <-- start at 349821
+RESET_DELAY            = 349821  # <-- start at 349821, go up to 349815 or down to 349830
 
 # scroll down to PIO program to change pulse width
 
@@ -22,12 +22,17 @@ TEST_JIG = False
 
 RP2040_ZERO = False
 if RP2040_ZERO is True:
-    # RP2040 Zero, pin configuration is temporary
+    # RP2040 Zero
+    #
     # RP2040 Zero clones can run the stock RPi Pico Micropython build.
     # note that it might be unstable - testing continues
-    PIN_POST_1 = 7
-    PIN_CPU_RESET_IN = 5
-    SET_PIN_BASE = 10
+    #
+    # glitching performance is very poor on RP2040 Zero (can take 6+ tries)
+    # power users can still hook this up and use this code on RP2040 Zero
+    # but it's not really recommended. use a normal pico (or clone) instead.
+    PIN_POST_1 = 12
+    PIN_CPU_RESET_IN = 13
+    SET_PIN_BASE = 9  # 9 = PLL, 10 = reset output
 elif TEST_JIG is True:
     # rpi pico with pinout matching 8-wire POST version (debug/development only)
     PIN_POST_1 = 16

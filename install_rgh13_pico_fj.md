@@ -8,7 +8,7 @@ Pico is unable to run in sync with the standby clock, **and it's kinda dangerous
 ## Shit ya need
 
 You will need:
-- A supported RP2040-based device (supported are: Raspberry Pi Pico)
+- A supported RP2040-based device (supported are: Raspberry Pi Pico, RP2040 Zero)
 - 1x 22k ohm resistor for interfacing to the PLL point
 - One or two fast or ultrafast diode(s) (less than 5 ns recovery time) -- **THIS IS NON NEGOTIABLE!**
 - 1x any diode for interfacing to the POST bus
@@ -16,6 +16,13 @@ You will need:
 - Lotsa wires
 - Heatshrink
 - The usual soldering crap
+
+### Which RP2040 device works best?
+
+The Pico, and it's not even close.
+
+While the RP2040 Zero is supported here, it doesn't perform as well as the Pico, and you will need
+to spend time tweaking the timings until you find something that works.
 
 ## Programming your Pico
 
@@ -59,11 +66,13 @@ which is NOT guaranteed to be safe and is only really here for illustrative purp
 
 Feast your eyes on the following diagrams.
 
+**IMPORTANT!** You need to connect +5V to VBUS via a diode to prevent backfeeding power into the Xbox.
+Failing to do so will cause issues with your console and your computer if you later decide to connect the
+Pico to your computer for tuning and program updates.
+
 **Raspberry Pi Pico:**
 
 ![](rgh13_pico_wiring.jpg)
-
-In summary:
 
 - GPIO12 = reset input, to /CPU_RST_N (3v3 reset solderpoint under the southbridge)
 - GPIO13 = POST bit 1 input (via diode)
@@ -72,9 +81,16 @@ In summary:
 - VBUS = +5V, can be from USB or standby (standby preferred), MUST be connected via a power diode (see below)
 - GND = ...well, ground????
 
-**IMPORTANT!** You need to connect +5V to VBUS via a diode to prevent backfeeding power into the Xbox.
-Failing to do so will cause issues with your console and your computer if you later decide to connect the
-Pico to your computer for tuning and program updates.
+**RP2040 Zero:**
+
+![](rgh13_rp2040zero_wiring.jpg)
+
+- GPIO13 = reset input, to /CPU_RST_N (3v3 reset solderpoint under the southbridge)
+- GPIO12 = POST bit 1 input (via diode)
+- GPIO10 = reset output, to /CPU_RST_1V1P_N (normal reset solder point)
+- GPIO9 = PLL (via 22k resistor)
+- VBUS = +5V, can be from USB or standby (standby preferred), MUST be connected via a power diode (see below)
+- GND = ...well, ground????
 
 And here's where to solder, assuming you're using RGH1.3 zero-wire POST:
 
