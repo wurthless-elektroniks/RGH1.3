@@ -97,7 +97,7 @@ mainloop_reorg_start:
     lcall 0x11C4                        ; reset watchdog (reboots if GetPowerUpCause isn't received in time)
     lcall 0x0FF6                        ; reset statemachine (performs actual hardware reset sequence)
     lcall 0x0D94                        ; powerdown statemachine
-    lcall rgh13_statemachines_exec      ; our custom code below
+    lcall rgh13_statemachines_exec_proxy      ; our custom code below
 mainloop_reorg_end:
 
     ; 0x07DE - zero out memory starting from 0xB8 instead
@@ -191,6 +191,10 @@ _avpack_is_present:
 cpu_reset_handler:
     lcall on_reset_watchdog_deassert_cpu_reset
     ljmp msftsmc_deassert_cpu_reset
+
+rgh13_statemachines_exec_proxy:
+    acall rgh13_statemachines_exec
+    ljmp  0x1300 ; so that debug LED statemachine, normally disabled, can run
 
     .include "rgh13_0wire.s"
 
