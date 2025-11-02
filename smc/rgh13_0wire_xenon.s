@@ -44,9 +44,6 @@ g_power_up_cause_backup                 equ VARBASE-1
 ; ------------------------------------------------------------------------------------
     .org 0x0000
 
-    mov dptr,#gpu_reset_deassert_start
-    mov dptr,#gpu_reset_deassert_end
-
     mov dptr,#mainloop_reorg_start
     mov dptr,#mainloop_reorg_end
 
@@ -89,15 +86,6 @@ g_power_up_cause_backup                 equ VARBASE-1
 ; Patches
 ;
 ; ------------------------------------------------------------------------------------
-
-    ; 0x0078: function strobes FIFLG.3 several times before bringing GPU out of reset
-    ; so remove that unnecessary behavior
-    .org 0x0078
-gpu_reset_deassert_start:
-    setb gpio_gpu_rst_n
-    ret
-gpu_reset_deassert_end:
-
 
     .org 0x7B6
 mainloop_reorg_start:
