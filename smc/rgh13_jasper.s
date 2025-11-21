@@ -106,6 +106,14 @@ if (RGH13_POST_7=gpio_smc_cpu_chkstop_detect || ZEPHYR=1)
     .include "rgh13_jasper_chkstop_decls.inc"
 endif
 
+    ; there are SMC commands that can use otherwise unused SMC space
+    ; for storing a bunch of variables. i don't think the system ever
+    ; uses these, so we disable all writes and return 0 for all reads
+    mov dptr,#ipc_debugram_write_patch_start
+    mov dptr,#ipc_debugram_write_patch_end
+    mov dptr,#ipc_debugram_read_patch_start
+    mov dptr,#ipc_debugram_read_patch_end
+
     mov dptr,#rgh13_common_code_start
     mov dptr,#rgh13_common_code_end
 
@@ -203,6 +211,16 @@ powerup_reroute_start:
     nop ; because we overwrote two CLR opcodes
 powerup_reroute_end:
 
+
+    .org 0x244F
+ipc_debugram_write_patch_start:
+    nop    ; change mov @r0,a to a nop so writes do nothing
+ipc_debugram_write_patch_end:
+
+    .org 0x246F
+ipc_debugram_read_patch_start:
+    clr a  ; change mov a,@r0 to clr a so reads always return 0
+ipc_debugram_read_patch_end:
 
 if RGH13_POST_7=gpio_tiltsw_n
     .include "rgh13_jasper_tiltsw_patches.s"
