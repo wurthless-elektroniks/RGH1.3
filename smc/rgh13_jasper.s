@@ -211,16 +211,7 @@ powerup_reroute_start:
     nop ; because we overwrote two CLR opcodes
 powerup_reroute_end:
 
-
-    .org 0x244F
-ipc_debugram_write_patch_start:
-    nop    ; change mov @r0,a to a nop so writes do nothing
-ipc_debugram_write_patch_end:
-
-    .org 0x246F
-ipc_debugram_read_patch_start:
-    clr a  ; change mov a,@r0 to clr a so reads always return 0
-ipc_debugram_read_patch_end:
+    .include "rgh13_jasper_debugram_stubout.s"
 
 if RGH13_POST_7=gpio_tiltsw_n
     .include "rgh13_jasper_tiltsw_patches.s"

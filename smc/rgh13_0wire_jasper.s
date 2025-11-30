@@ -86,6 +86,14 @@ endif
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
 
+    ; there are SMC commands that can use otherwise unused SMC space
+    ; for storing a bunch of variables. i don't think the system ever
+    ; uses these, so we disable all writes and return 0 for all reads
+    mov dptr,#ipc_debugram_write_patch_start
+    mov dptr,#ipc_debugram_write_patch_end
+    mov dptr,#ipc_debugram_read_patch_start
+    mov dptr,#ipc_debugram_read_patch_end
+
     mov dptr,#rgh13_common_code_start
     mov dptr,#rgh13_common_code_end
 
@@ -182,6 +190,8 @@ powerup_reroute_end:
 if ZEPHYR=1
     .include "rgh13_jasper_chkstop_patches.s"
 endif
+
+    .include "rgh13_jasper_debugram_stubout.s"
 
     .org 0x2D73
 rgh13_common_code_start:
