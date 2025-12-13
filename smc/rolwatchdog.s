@@ -71,7 +71,16 @@ _led_lightshow_sm_do_state_2:
     dec @r0
     cjne @r0,#0,led_lightshow_sm_do_nothing
 
-    ; reset on timeout
+    ; stash powerup cause because it will get trashed on reboot
+    mov r0,#g_power_up_cause
+    mov a,@r0
+    mov r0,#g_power_up_cause_backup
+    mov @r0,a
+
+    mov r0,#g_hardreset_sm_state   ; abusing hardreset sm for restoring state
+    mov @r0,#0x63
+
+    ; soft reset via ipc
     mov r4,#0
     mov r5,#3
     ljmp msftsmc_request_reboot
@@ -104,3 +113,18 @@ _led_lightshow_sm_go_idle:
     mov r0,#g_ledlightshow_watchdog_state
     mov @r0,#0
     ret
+
+; lcall installed where powerup cause normally set to 0x31
+softreset_callback:
+    mov r0,#g_hardreset_sm_state
+    mov a,@r0
+    cjne a,0x63,_softreset_wasnt_by_us
+    mov @r0,#0
+    mov r0,#g_power_up_cause_backup ; read stashed powerup cause
+    mov a,@r0
+    ret
+
+_softreset_wasnt_by_us:
+    mov a,#0x31
+    ret
+

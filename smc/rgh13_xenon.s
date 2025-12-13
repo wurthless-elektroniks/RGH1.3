@@ -70,6 +70,8 @@ g_power_up_cause_backup                 equ VARBASE-1
     mov dptr,#resetwatchdog_on_timeout_start
     mov dptr,#resetwatchdog_on_timeout_end
 
+    .include "rgh13_xenon_softreset_callback_decls.inc"
+
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
 
@@ -172,6 +174,7 @@ powerup_reroute_start:
     nop
 powerup_reroute_end:
 
+    .include "rgh13_xenon_softreset_callback_patches.s"
 
     ; 0x224E: reads dbg leds
     ; can likely skip this, and use the rest of the function as free space

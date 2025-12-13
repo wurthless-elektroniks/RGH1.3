@@ -106,6 +106,8 @@ if (RGH13_POST_7=gpio_smc_cpu_chkstop_detect || ZEPHYR=1)
     .include "rgh13_jasper_chkstop_decls.inc"
 endif
 
+    .include "rgh13_jasper_softreset_callback_decls.inc"
+
     ; there are SMC commands that can use otherwise unused SMC space
     ; for storing a bunch of variables. i don't think the system ever
     ; uses these, so we disable all writes and return 0 for all reads
@@ -222,6 +224,8 @@ endif
 if (RGH13_POST_7=gpio_smc_cpu_chkstop_detect || ZEPHYR=1)
     .include "rgh13_jasper_chkstop_patches.s"
 endif
+
+    .include "rgh13_jasper_softreset_callback_patches.s"
 
     .org 0x2D73
 rgh13_common_code_start:

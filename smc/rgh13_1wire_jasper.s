@@ -88,6 +88,8 @@ endif
     mov dptr,#resetwatchdog_on_timeout_start
     mov dptr,#resetwatchdog_on_timeout_end
 
+    .include "rgh13_jasper_softreset_callback_decls.inc"
+    
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
 
@@ -210,6 +212,7 @@ if ZEPHYR=1
 endif
 
     .include "rgh13_jasper_debugram_stubout.s"
+    .include "rgh13_jasper_softreset_callback_patches.s"
 
     .org 0x2D73
 rgh13_common_code_start:

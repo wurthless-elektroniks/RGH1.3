@@ -38,6 +38,11 @@ def apply_overlay(clean_smc: bytes, smc_overlay: bytes) -> bytes | None:
         # there's not much error handling here, so be careful with how you assemble things
         patch_start_address = struct.unpack(">H", smc_overlay[overlay_parse_pos+1:overlay_parse_pos+3])[0]
         patch_end_address   = struct.unpack(">H", smc_overlay[overlay_parse_pos+4:overlay_parse_pos+6])[0]
+
+        # 0x2FC0 onward means patch is too big
+        if patch_end_address >= 0x2FC0:
+            raise RuntimeError("patch is too big. size optimize your shit please")
+
         patched_smc[patch_start_address:patch_end_address] = smc_overlay[patch_start_address:patch_end_address]
 
         print(f"\t- patched {patch_start_address:04x}~{patch_end_address:04x}")

@@ -68,6 +68,8 @@ g_power_up_cause_backup                 equ VARBASE-1
     mov dptr,#resetwatchdog_on_timeout_start
     mov dptr,#resetwatchdog_on_timeout_end
 
+    .include "rgh13_xenon_softreset_callback_decls.inc"
+
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
 
@@ -164,6 +166,8 @@ powerup_reroute_start:
     lcall powerup_event_callback
     nop
 powerup_reroute_end:
+
+    .include "rgh13_xenon_softreset_callback_patches.s"
 
     .org 0x2DAA
 rgh13_common_code_start:

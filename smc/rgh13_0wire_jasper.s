@@ -85,6 +85,8 @@ endif
 
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
+    
+    .include "rgh13_jasper_softreset_callback_decls.inc"
 
     ; there are SMC commands that can use otherwise unused SMC space
     ; for storing a bunch of variables. i don't think the system ever
@@ -192,6 +194,7 @@ if ZEPHYR=1
 endif
 
     .include "rgh13_jasper_debugram_stubout.s"
+    .include "rgh13_jasper_softreset_callback_patches.s"
 
     .org 0x2D73
 rgh13_common_code_start:
