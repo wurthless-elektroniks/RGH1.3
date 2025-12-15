@@ -109,6 +109,9 @@ def _do_patches(cbb_image: bytes,
 
 def rgh13cbb_do_patches(cbb_image: bytes, use_smc_ipc: bool = False):
 
+    print("WARNING: rgh13cbb_do_patches is OBSOLETE and will be removed in the future!")
+    print("if you are seeing this in convert_rgh13.py you've run into a bug!")
+
     # for 5772, 6752, 9188
     if cbb_image[0x994:0x998] == bytes([0x48, 0x00, 0x03, 0xC9]) and \
         cbb_image[0x9E8:0x9EC] == bytes([0x1C, 0xC6, 0x00, 0x32]) and \

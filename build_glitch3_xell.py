@@ -16,7 +16,7 @@ from xell.patch_5772_xell import xell5772_do_patches
 from xell.patch_6752_xell import xell6752_do_patches
 from xell.patch_7378_xell import xell7378_do_patches
 from cbbpatch import rgh13cbb_do_patches
-from xebuildpatch import xebuild_apply_cb_patch
+from xebuildpatch import xebuild_apply_cb_patch, xebuild_apply_cb_patch_from_file
 
 key_1BL = b"\xDD\x88\xAD\x0C\x9E\xD6\x69\xE7\xB5\x67\x94\xFB\x68\x56\x3E\xFA"
 
@@ -341,17 +341,33 @@ def main():
 
     # rgh13cbb_do_patches() autodetects which patches to apply then applies them
     cbb_1940_ipc = rgh13cbb_do_patches(bytearray(cbb_1940), use_smc_ipc=True)
-    cbb_4577_ipc = rgh13cbb_do_patches(bytearray(cbb_4577), use_smc_ipc=True)
-    cbb_5772_ipc = rgh13cbb_do_patches(bytearray(cbb_5772), use_smc_ipc=True)
-    cbb_6752_ipc = rgh13cbb_do_patches(bytearray(cbb_6752), use_smc_ipc=True)
-    cbb_7378_ipc = rgh13cbb_do_patches(bytearray(cbb_7378), use_smc_ipc=True)
+    
+    cbb_4577_ipc = xebuild_apply_cb_patch_from_file(bytearray(cbb_4577),
+                            os.path.join("patches",  "cbb_4577_ipc.bin"))
+    
+    cbb_5772_ipc = xebuild_apply_cb_patch_from_file(bytearray(cbb_5772),
+                            os.path.join("patches",  "cbb_5772_ipc.bin"))
+    
+    cbb_6752_ipc = xebuild_apply_cb_patch_from_file(bytearray(cbb_6752),
+                            os.path.join("patches",  "cbb_6752_ipc.bin"))
+    
+    cbb_7378_ipc = xebuild_apply_cb_patch_from_file(bytearray(cbb_7378),
+                            os.path.join("patches",  "cbb_7378_ipc.bin"))
+
     cbb_1940     = rgh13cbb_do_patches(cbb_1940, use_smc_ipc=False)
-    cbb_4577     = rgh13cbb_do_patches(cbb_4577, use_smc_ipc=False)
-    cbb_5772     = rgh13cbb_do_patches(cbb_5772, use_smc_ipc=False)
-    cbb_6752     = rgh13cbb_do_patches(cbb_6752, use_smc_ipc=False)
-    cbb_7378     = rgh13cbb_do_patches(cbb_7378, use_smc_ipc=False)
 
+    cbb_4577     = xebuild_apply_cb_patch_from_file(bytearray(cbb_4577),
+                                os.path.join("patches",  "cbb_4577_post67.bin"))
 
+    cbb_5772     = xebuild_apply_cb_patch_from_file(bytearray(cbb_5772),
+                                os.path.join("patches",  "cbb_5772_post67.bin"))
+    
+    cbb_6752     = xebuild_apply_cb_patch_from_file(bytearray(cbb_6752),
+                                os.path.join("patches",  "cbb_6752_post67.bin"))
+    
+    cbb_7378     = xebuild_apply_cb_patch_from_file(bytearray(cbb_7378),
+                                os.path.join("patches",  "cbb_7378_post67.bin"))
+    
     cbbs = {
         '1940':     cbb_1940,
         '1940_ipc': cbb_1940_ipc,

@@ -6,7 +6,6 @@ import re
 from argparse import ArgumentParser,RawTextHelpFormatter
 from enum import Enum
 from smc import encrypt_smc, decrypt_smc
-from cbbpatch import rgh13cbb_do_patches
 from patcher import assemble_branch
 from xebuildpatch import xebuild_apply_cb_patch, xebuild_apply_cb_patch_from_file
 import ecc
@@ -533,7 +532,13 @@ def main():
             cbb_version = 4577
     
     # inject appropriate hacked CB_B
-    cbb_patched = rgh13cbb_do_patches(cbb, use_smc_ipc=args.onewire or args.zerowire)
+    cbb_patched = bytearray(cbb)
+    if args.onewire or args.zerowire:
+        cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched,
+                                        os.path.join("patches",  f"cbb_{cbb_version}_ipc.bin"))
+    else:
+        cbb_patched = xebuild_apply_cb_patch_from_file(cbb_patched,
+                                        os.path.join("patches",  f"cbb_{cbb_version}_post67.bin"))
 
     # restore parameters if the CB_B was replaced
     cbb_patched[0x10:0x40] = cbb_params
