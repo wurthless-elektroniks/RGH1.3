@@ -115,3 +115,76 @@ So all the heavy lifting with this technique is done by the CPU and the SMC. And
 need to do: actually write the glitch chip code. And it's just a one line change in the RGH1.2 v2 source so that
 only we wait 10 ms before applying PLL slowdown instead of RGH1.2's timing of 400 ms.
 
+## And then there were none: From two diodes to zero-wire POST
+
+Many months later it's time to tell the story of how the POST wires were removed from this method.
+
+While reusing the tiltswitch I/O for monitoring the POST line is a nice idea that doesn't really impact the
+system, it isn't ideal because you have to hack the board up. So it was time to find alternatives.
+
+The problem is that Ghidra, when you read the disassembly, doesn't really give you a good idea of what registers
+map to which ports, because the SMC's i8051 port mapping is different than a stock 8051. The tiltswitch I/O was
+very easy to find because it appears in the disassembly as `P1.1`. Time to disassemble this thing even more to
+find alternatives.
+
+The first alternative considered was /EXT_PWR_ON_N. It's a little used debugging signal that, like the tiltswitch I/O,
+is pulled up and is super easy to find on the board. The disassembly also makes it easy to identify which I/O register
+it's connected to as it's one of the few I/O lines that can cause the system to power on. Unfortunately, that behavior
+is one of the reasons why reuse of this I/O line wasn't ideal, because when you're trying to flash your system you have
+to do installation steps in the right order or else the thing will power on when you don't want it to. Further testing
+revealed this I/O line is very noisy, and I'm not sure why - it might be because of the debouncing capacitor, but when
+I removed it from my test Falcon the thing still wouldn't cooperate.
+
+The good news is that /EXT_PWR_ON_N is on the same I/O port as another debugging signal called SMC_CPU_CHKSTOP_DETECT.
+This is a signal from the CPU, buffered via a transistor, that is raised when a fatal CPU error occurs, and initially
+it was left alone because it could have error handling code. But when I took another test Falcon out of the parts bin and
+disabled the buffer transistor, the thing booted to the dashboard without complaints. This I/O line was also ideal for
+POST line monitoring because of the 10k pullup resistor. Testing revealed it was super reliable and didn't require much
+board hackery, so it was used.
+
+In the meantime the SMC code was ported to Xenon consoles, as Xenons can be very slow to boot under EXT_CLK. In retrospect
+another advantage for using the RGH1.3 technique on Xenon are that you can use the 194x loaders to boot the system
+almost as fast as a Jasper; you can't do this with the stock timing files because they're tied to the 5772 bootloader.
+
+Which brings me to my next point. I had branched out to bootloader experimentation and patching to see which bootloaders
+ran the fastest. This also meant categorizing each CB loader by its hwinit program (basically bytecode that configures
+the PCI devices and initializes SDRAM). Mate had built a basic hwinit bytecode disassembler that I had lying around for
+a couple months, but it was incomplete, so I went and made some improvements to it (which turned out to be based on a
+lot of wrong assumptions, unfortunately).
+
+The resulting hwinit disassemblies revealed a couple things. The first was the basic procedure to get PCI initialized
+so that we could talk to the SMC at a much earlier stage in the boot than in hwinit. Initially I thought this was too
+unstable to put in CB_X because it would run immediately after the glitch, when the CPU is still in an unstable state.
+But the other discovery was that hwinit reliably sends SMC command 0x12 just before SDRAM training begins. This meant
+that hwinit status monitoring could be done entirely using SMC commands, while POST monitoring could be used in the
+early boot stages. Thus was the birth of the one-wire POST method.
+
+But, of course, why even use POST wires at all? I threw together a zero-wire POST method that simply waited for
+POST 0x12. But that method gives up several hundred milliseconds, so it was time to integrate the PCI initialization
+code into CB_X, with the resulting fork named "CB_Y". CB_Y initializes the PCI devices to the point where the CPU
+can talk to the SMC, then it sends a "now loading CB_B" message when it starts and a "CB_B loaded, now running it"
+message when it's done. Then it's just a matter of waiting for hwinit and then GetPowerUpCause afterwards.
+
+Combined with g3fix, which makes older kernels bootable on RGH3 and RGH1.3, I think it's safe to say that RGH1.3
+is more or less ready to supersede RGH1.2, but there are still some problems that preclude its wide adoption.
+The first, obviously, is that we're now in the softmod era, and most people will be happy with BadUpdate or whatever
+methods pop up after that. The second and more important problem is that it requires a shit ton of patching and code
+just to produce a working image, which will be a headache to integrate into other tools. If anything, though, I'll
+be happy when the "RGH1.2 is completely flawless in every way and if you have any problem with it it's entirely your
+fault" mindset and the people who've adopted it are laughed out of the 360 scene.
+
+In the end I don't really see any of this as a major accomplishment. Like RGH3, it's something the 360 scene could
+have had years ago if they had removed their heads from their collective ass. The 360 scene though is happy with
+mediocrity and half-solutions, so it's not really a surprise it took this long for something like this to be
+created.
+
+In general, 2025 saw way more activity and improvements than in the last few years combined. And what did the RGH
+lamers do this whole time? Just constant posturing, trying to sell their consoles and inflate their resumes, and
+pretending they're still relevant. The best the RGH clique could come up with this year was some vaporware modchip
+with a bunch of extra I/O lines for... uh... purposes. Meanwhile the ancient Matrix or even a Raspberry Pi Pico
+could perform better than that simply with better technique. And, of course, BadUpdate's success rate and speed
+massively improved halfway through the year, and we'll eventually be getting a harddrive-based exploit that will
+signal the rebirth of the JTAG rebooter method of hacking consoles. These teenage know-it-alls don't know it yet,
+but the world is moving on without them, and thank god it is.
+
+Do better, people.
