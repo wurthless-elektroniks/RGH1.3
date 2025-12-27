@@ -20,8 +20,8 @@ g_rrod_base_error_pattern equ 05Ch
 g_power_up_cause equ 061h
 
 ; these flags all trigger RRoD
-g_force_rrod_3                          equ 023h.5 ; guessed
-g_force_rrod_4                          equ 023h.2
+g_force_rrod_power                      equ 023h.2
+g_force_rrod_overheat                   equ 023h.3
 g_force_rrod_ipc                        equ 023h.4
 
 g_rol_ledstate                          equ 0D6h
@@ -32,6 +32,9 @@ g_rol_run_bootanim                      equ 028h.3
 g_rol_update_pending                    equ 028h.4
 
 msftsmc_sysreset_watchdog_exec_state_10 equ 0x1180
+msftsmc_sysreset_watchdog_raise_rrod_and_give_up equ 0x1187
+msftsmc_sysreset_watchdog_request_reset equ 0x1197
+
 msftsmc_deassert_cpu_reset equ 0x00A0
 
 msftsmc_ipc_handle_bit7_message equ 0x09F7

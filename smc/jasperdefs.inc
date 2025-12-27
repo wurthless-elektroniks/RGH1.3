@@ -14,9 +14,14 @@ g_powerdown_sm_should_run               equ 022h.0
 
 g_has_getpowerupcause_arrived           equ 022h.3
 
+
+g_checkstop_active                      equ 023h.3 ; checkstop active (falcon/jasper)
+
 ; these flags all trigger RRoD
-g_force_rrod_3                          equ 023h.3 ; checkstop active (falcon/jasper)
-g_force_rrod_4                          equ 023h.4 ; raised if there's a power problem
+; power/overheat shut the system down toute de suite
+; overheat protection leaves the fans running at max for a few seconds
+g_force_rrod_power                      equ 023h.4
+g_force_rrod_overheat                   equ 023h.5
 g_force_rrod_ipc                        equ 023h.6 ; from IPC, also set by reset watchdog
 
 g_rrod_errorcode_1        equ 05Ah
@@ -36,9 +41,14 @@ g_rol_run_bootanim                      equ 028h.7
 
 ; important functions
 msftsmc_sysreset_watchdog_exec_state_10 equ 0x12B7
+msftsmc_sysreset_watchdog_raise_rrod_and_give_up equ 0x12C1
+msftsmc_sysreset_watchdog_request_reset equ 0x12D1
+
 msftsmc_deassert_cpu_reset equ 0x006C
 
 msftsmc_ipc_handle_bit7_message equ 0x0ACF
 msftsmc_ipc_write_outbox_fifo   equ 0x246C
 
+
 msftsmc_request_reboot equ 0x0B68
+

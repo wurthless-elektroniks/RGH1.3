@@ -22,7 +22,8 @@ g_power_up_cause equ 062h
 
 ; these flags all trigger RRoD
 g_force_rrod_3                          equ 023h.3 ; checkstop active (falcon/jasper)
-g_force_rrod_4                          equ 023h.4 ; raised if there's a power problem
+g_force_rrod_power                      equ 023h.4 ; raised if there's a power problem
+g_force_rrod_overheat                   equ 023h.5
 g_force_rrod_ipc                        equ 023h.6 ; from IPC, also set by reset watchdog
 
 
@@ -40,3 +41,5 @@ msftsmc_sysreset_watchdog_exec_state_10 equ 0x12A3
 msftsmc_deassert_cpu_reset equ 0x006C
 
 msftsmc_request_reboot equ 0x0B63
+
+msftsmc_sysreset_watchdog_request_reset equ 0x12BA

@@ -59,8 +59,9 @@ turboreset_sm_exec:
     jnb g_sysreset_watchdog_should_run,_turboreset_sm_disarm
     jb  g_requesting_reset,_turboreset_sm_disarm
 
-    ; also cut the state machine off if RRoD raised
-    jb g_force_rrod_4,_turboreset_sm_disarm
+    ; also cut the state machine off if *ANY* RRoD raised
+    jb g_force_rrod_power,_turboreset_sm_disarm
+    jb g_force_rrod_overheat,_turboreset_sm_disarm
     jb g_force_rrod_ipc,_turboreset_sm_disarm
 
     ; read the state, it's time to start execution
@@ -145,7 +146,7 @@ _turboreset_sm_exec_state_5:
 
 ; ------------------------------------------------------------------------------------
 ;
-; IPC hooks specific to 1-wire RGH1.3
+; IPC hooks specific to 0-wire RGH1.3
 ;
 ; ------------------------------------------------------------------------------------
 
