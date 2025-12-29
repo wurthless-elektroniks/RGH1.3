@@ -74,14 +74,7 @@ endif
     mov dptr,#on_reset_done_reroute_start
     mov dptr,#on_reset_done_reroute_end
 
-    mov dptr,#resetwatchdog_reload_counter_1_start
-    mov dptr,#resetwatchdog_reload_counter_1_end
-    mov dptr,#resetwatchdog_reload_counter_2_start
-    mov dptr,#resetwatchdog_reload_counter_2_end
-    mov dptr,#resetwatchdog_on_success_start
-    mov dptr,#resetwatchdog_on_success_end
-    mov dptr,#resetwatchdog_on_timeout_start
-    mov dptr,#resetwatchdog_on_timeout_end
+    .include "rgh13_jasper_resetwatchdog_decls.inc"
 
     mov dptr,#powerup_reroute_start
     mov dptr,#powerup_reroute_end
@@ -159,29 +152,7 @@ on_reset_done_reroute_start:
     lcall cpu_reset_handler
 on_reset_done_reroute_end:
 
-    .org 0x1279
-resetwatchdog_reload_counter_1_start:
-    mov 0x3D,#RESET_WATCHDOG_TIMEOUT_TICKS
-resetwatchdog_reload_counter_1_end:
-
-    .org 0x1290
-resetwatchdog_reload_counter_2_start:
-    mov 0x3D,#RESET_WATCHDOG_TIMEOUT_TICKS
-resetwatchdog_reload_counter_2_end:
-
-    ; reset watchdog patch: GetPowerUpCause arrived
-    ; so jump to custom code to start the LED lightshow watchdog
-    ; (I had problems monitoring g_has_getpowerupcause_arrived)
-    .org 0x12AD
-resetwatchdog_on_success_start:
-    ljmp on_reset_watchdog_done
-resetwatchdog_on_success_end:
-
-    .org 0x12BA
-resetwatchdog_on_timeout_start:
-    lcall on_reset_watchdog_timeout
-    ljmp  0x12D1
-resetwatchdog_on_timeout_end:
+    .include "rgh13_jasper_resetwatchdog_patches.s"
 
     .org 0x1E7D
 powerup_reroute_start:

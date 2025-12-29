@@ -65,15 +65,7 @@ g_power_up_cause_backup                 equ VARBASE-1
     mov dptr,#ipc_setled_reroute_start
     mov dptr,#ipc_setled_reroute_end
 
-    mov dptr,#resetwatchdog_release_cpu_reset_start
-    mov dptr,#resetwatchdog_release_cpu_reset_end
-    mov dptr,#resetwatchdog_reload_counter_2_start
-    mov dptr,#resetwatchdog_reload_counter_2_end
-    mov dptr,#resetwatchdog_on_success_start
-    mov dptr,#resetwatchdog_on_success_end
-    mov dptr,#resetwatchdog_on_timeout_start
-    mov dptr,#resetwatchdog_on_timeout_end
-
+    .include "rgh13_xenon_resetwatchdog_decls.inc"
     .include "rgh13_xenon_softreset_callback_decls.inc"
 
     mov dptr,#powerup_reroute_start
@@ -150,29 +142,7 @@ ipc_setled_reroute_start:
     ljmp ipc_led_anim_has_arrived
 ipc_setled_reroute_end:
 
-
-    .org 0x1148
-resetwatchdog_release_cpu_reset_start:
-    lcall cpu_reset_handler
-    mov 0x3D,#RESET_WATCHDOG_TIMEOUT_TICKS
-resetwatchdog_release_cpu_reset_end:
-
-    .org 0x115C
-resetwatchdog_reload_counter_2_start:
-    mov 0x3D,#RESET_WATCHDOG_TIMEOUT_TICKS
-resetwatchdog_reload_counter_2_end:
-
-    .org 0x117C
-resetwatchdog_on_success_start:
-    ljmp on_reset_watchdog_done
-resetwatchdog_on_success_end:
-
-    .org msftsmc_sysreset_watchdog_exec_state_10
-resetwatchdog_on_timeout_start:
-    lcall on_reset_watchdog_timeout
-    ljmp  0x1197
-resetwatchdog_on_timeout_end:
-
+    .include "rgh13_xenon_resetwatchdog_patches.s"
 
     .org 0x1212
 avpack_reroute_1_start:

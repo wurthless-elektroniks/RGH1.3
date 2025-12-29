@@ -148,8 +148,7 @@ resetwatchdog_on_success_end:
 
     .org msftsmc_sysreset_watchdog_exec_state_10
 resetwatchdog_on_timeout_start:
-    lcall on_reset_watchdog_timeout
-    ljmp  0x12BA
+    ljmp on_reset_watchdog_error_case
 resetwatchdog_on_timeout_end:
 
     .org 0x1E62

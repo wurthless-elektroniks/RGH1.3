@@ -64,14 +64,7 @@ rgh13_statemachines_exec:
 ;
 ; ------------------------------------------------------------------------------------
 
-on_reset_watchdog_timeout:
-    ; assert /CPU_RST_N now so POST bits drop to 0
-    ; if we don't do this then our POST bit check will fail and we'll get a RRoD
-    clr gpio_cpu_rst_n
-
-    ; turn off statemachines that might be running
-    acall _led_lightshow_sm_go_idle
-    sjmp  _turboreset_sm_disarm
+    .include "reset.s"
 
 ; hook from SMC code lands here
 ;
@@ -207,11 +200,9 @@ _turboreset_sm_common_timeout_code:
     dec @r0
     cjne @r0,#0,_turboreset_do_nothing
     
-    ; we've timed out - call common disarm code below instead of repeating it
-    acall _turboreset_sm_disarm
-
+    ; we've timed out - go reboot
 _turboreset_reboot_via_sysreset_watchdog:
-    ljmp msftsmc_sysreset_watchdog_exec_state_10
+    ljmp reset_via_watchdog
 
 _turboreset_sm_go_state_4:
 
