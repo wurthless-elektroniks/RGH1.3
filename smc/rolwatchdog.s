@@ -119,7 +119,7 @@ _led_lightshow_sm_go_idle:
 softreset_callback:
     mov r0,#g_hardreset_sm_state
     mov a,@r0
-    cjne a,0x63,_softreset_wasnt_by_us
+    cjne a,#0x63,_softreset_wasnt_by_us
     mov @r0,#0
     mov r0,#g_power_up_cause_backup ; read stashed powerup cause
     mov a,@r0
