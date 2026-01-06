@@ -21,13 +21,15 @@ SHA1_FALCON_RGH3_27MHZ = "9b89a53dbdb4735782e92b70bb5e956f6b35da5f"
 SHA1_FALCON_RGH3_10MHZ = "a4ae6a6f1ff374739d1c91f8a2881f4eecc210d3"
 
 XENON_SMC_SHAS = [
-    "e0ad45093f0564c7500fbbcfc6dd957a54385fd1"
+    "e0ad45093f0564c7500fbbcfc6dd957a54385fd1",
+    "b16fc56faa7a4271ee2e433418160a8b72d57ed3", # v3 (1.01) - infinite reboot patch
 ]
 
 ZEPHYR_SMC_SHAS = [
 ]
 
 FALCON_SMC_SHAS = [
+    "6a0ec2da24fc66a9c961b7847934e26eb288ed4f", # v2 (1.06) retail
 ]
 
 JASPER_SMC_SHAS = [
@@ -227,6 +229,12 @@ def _calc_mystery_seeds(cbb: bytes):
 
     return seeds
 
+def _calc_smc_sha(smc_encrypted: bytes) -> dict:
+    # this will decrypt and descramble the SMC predictably
+    # xeBuild always generates random values for the fake firstfour,
+    # and that throws off fingerprinting attempts
+    return hashlib.sha1(decrypt_smc(smc_encrypted))
+
 def _get_smc_type(smc_encrypted: bytes) -> dict:
     smc_plaintext = decrypt_smc(smc_encrypted)
 
@@ -240,8 +248,8 @@ def _get_smc_type(smc_encrypted: bytes) -> dict:
         0x07: "winchester"
     }
 
+    # copyright text string has to match or else the image is bad
     if smc_plaintext[0x10C:0x11C] != b"Copyright 2001-2":
-        print("WARNING: SMC looks invalid")
         return None
 
     target_console_and_revision = smc_plaintext[0x100]
@@ -326,13 +334,20 @@ def main():
     smc_type = _get_smc_type(nand_stripped[0x1000:0x4000])
     if smc_type is None:
         print("error: SMC doesn't look valid (should have copyright string at 0x10C)")
+        return
     
     smc_hash = hashlib.sha1(nand_stripped[0x1000:0x4000])
+    
+    # RGH2to3 always injects the SMC image as-is
     if smc_hash.hexdigest() == SHA1_FALCON_RGH3_27MHZ:
         print("found RGH3 v1 27 MHz SMC")
     elif smc_hash.hexdigest() == SHA1_FALCON_RGH3_10MHZ:
         print("found RGH3 v1 10 MHz SMC")
     else:
+        # there's a good chance this is a xeBuild image
+        # xeBuild always randomizes the fake first four bytes, so we have to recalc the hash
+        smc_hash = _calc_smc_sha(nand_stripped[0x1000:0x4000])
+
         print(f"WARNING: unrecognized SMC: {smc_hash.hexdigest()}")
         print(f"SMC program identifies itself as {smc_type['type']} rev. {smc_type['revision']} (v{smc_type['version']})")
         print("but this isn't really enough to identify the SMC as is. you might want to report the hash somewhere.")

@@ -43,8 +43,11 @@ def decrypt_smc(data: bytes) -> bytes:
         key[(i+1)&3] += mod
         key[(i+2)&3] += mod >> 8
 
-    # unscramble final plaintext
-    res = res[-8:-4] + res[4:-8] + b"\x00"*8
+    # unscramble final plaintext.
+    # the first four bytes of a freshly decrypted SMC binary are always fake.
+    # the real first four bytes are copied (NOT moved) from later in the SMC blob
+    # (verified against real hardware on XSB).
+    res[0:4] = res[-8:-4]
 
     return res
 
