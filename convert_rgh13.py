@@ -105,6 +105,16 @@ def _init_argparser():
                            action='store_true',
                            help="Use zero-wire POST method")
     
+    argparser.add_argument("--smcnoeject",
+                           default=False,
+                           action='store_true',
+                           help="Use xeBuild smcnoeject patch (patches SMC to ignore eject button presses, needed if DVD drive is removed)")
+
+    argparser.add_argument("--smcnoblink",
+                           default=False,
+                           action='store_true',
+                           help="Use xeBuild smcnoblink patch (patches SMC to pretend the DVD drive is always closed, needed if DVD drive is removed)")
+
     argparser.add_argument("updflash",
                            nargs='?',
                            help="Path to updflash.bin (WARNING: FILE WILL BE OVERWRITTEN)")
@@ -482,6 +492,16 @@ def main():
     if len(smcdata) != 0x3000:
         print("error: SMC somehow was not 0x3000 bytes. stopping.")
         return
+
+    if args.smcnoeject:
+        smcdata = bytearray(smcdata)
+        smcdata = smcdata.replace(bytes([0xA2, 0x90, 0xB3, 0x22]), bytes([0x00, 0x00, 0xC3, 0x22]))
+    
+    if args.smcnoblink:
+        smcdata = bytearray(smcdata)
+        smcdata = smcdata.replace(bytes([0xE4, 0xA2, 0xCF, 0x92, 0xE0, 0xA2, 0xCE, 0x22]),
+                                  bytes([0xE4, 0xD3, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00])
+                                  )
 
     # inject appropriate SMC image
     smcdata_encrypted = encrypt_smc(smcdata)
