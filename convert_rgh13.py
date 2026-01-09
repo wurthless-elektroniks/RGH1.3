@@ -317,6 +317,17 @@ def main():
 
     nand = None
     with open(flash_path, "rb") as f:
+        f.seek(0, os.SEEK_END)
+        nand_size = f.tell()
+        f.seek(0, os.SEEK_SET)
+
+        if (nand_size % 0x4200) != 0:
+            print("error: nand size invalid, probably not a valid ECC image")
+            return
+        
+        # TODO: find valid NAND sizes for e.g., bigblock systems
+        # but don't load the entire thing here because that will exhaust RAM...
+
         nand = f.read()
 
     nand_type = ecc.ecc_detect_type(nand)
