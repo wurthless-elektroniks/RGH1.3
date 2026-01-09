@@ -49,9 +49,6 @@ g_power_up_cause_backup                 equ VARBASE-1
 ; ------------------------------------------------------------------------------------
     .org 0x0000
 
-    mov dptr,#gpu_reset_deassert_start
-    mov dptr,#gpu_reset_deassert_end
-
     mov dptr,#mainloop_reorg_start
     mov dptr,#mainloop_reorg_end
 
@@ -75,10 +72,7 @@ g_power_up_cause_backup                 equ VARBASE-1
     mov dptr,#dbgled_readfcn_stubout_start
     mov dptr,#dbgled_readfcn_stubout_end
 
-    mov dptr,#port3_ddr_set_all_inputs_1_start
-    mov dptr,#port3_ddr_set_all_inputs_1_end
-    mov dptr,#port3_ddr_set_all_inputs_2_start
-    mov dptr,#port3_ddr_set_all_inputs_2_end
+    .include "rgh13_xenon_port3_decls.inc"
 
     mov dptr,#rgh13_common_code_start
     mov dptr,#rgh13_common_code_end
@@ -90,15 +84,6 @@ g_power_up_cause_backup                 equ VARBASE-1
 ; Patches
 ;
 ; ------------------------------------------------------------------------------------
-
-    ; 0x0078: function strobes FIFLG.3 several times before bringing GPU out of reset
-    ; so remove that unnecessary behavior
-    .org 0x0078
-gpu_reset_deassert_start:
-    setb gpio_gpu_rst_n
-    ret
-gpu_reset_deassert_end:
-
 
     .org 0x7B6
 mainloop_reorg_start:
@@ -173,21 +158,7 @@ _avpack_is_present:
 
 dbgled_readfcn_stubout_end:
 
-
-    ; 0x22B8: set pin directions among other things.
-    ; we'll set all pins on port 3 to inputs.
-    ; 0x22C1 - change to ORL DAT_SFR_a5,#0xFF
-    ; 0x22EE - change to MOV DAT_SFR_a5,#0xFF
-    .org 0x22C1
-port3_ddr_set_all_inputs_1_start:
-    orl gpioddr_port3,#0xFF
-port3_ddr_set_all_inputs_1_end:
-    .org 0x22EE
-port3_ddr_set_all_inputs_2_start:
-    mov gpioddr_port3,#0xFF
-port3_ddr_set_all_inputs_2_end:
-
-
+    .include "rgh13_xenon_port3_patches.s"
 
     .org 0x2DAA
 rgh13_common_code_start:
