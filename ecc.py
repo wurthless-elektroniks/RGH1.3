@@ -21,7 +21,7 @@ class NandType(Enum):
     Big Block mode (Jasper)
     '''
 
-def ecc_calc(sector: bytes) -> bytes:
+def ecc_calc(sector: bytes, special_data: int = 0) -> bytes:
     if len(sector) != (512+12):
         raise RuntimeError("sector size not 524 bytes (512 data, 12 bytes ECC header data)")
 
@@ -40,7 +40,13 @@ def ecc_calc(sector: bytes) -> bytes:
         if val & 1:
             val ^= 0x6954559
         val >>= 1
-    return struct.pack("<L", (~val << 6) & 0xFFFFFFFF)
+
+    # ECC data is actually 26 bits; lowest 6 bits are reserved for some
+    # metadata like indicating if the block contains system settings etc.
+    val = (~val << 6) & 0xFFFFFFC0
+    val = val | (special_data & 0x3F)
+
+    return struct.pack("<L", val)
 
 def ecc_encode(bin_image: bytes,
                nand_type: NandType,
