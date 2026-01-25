@@ -13,6 +13,10 @@ consoles.
 RGH1.3 is no longer experimental and can be called a beta, but it still has bugs that need to be killed.
 You can use it if you want but I can't guarantee it'll work for you. Use it at your own risk!
 
+RGH1.3 is also now at the point where 90% of what's important is there and I'm beginning to wind the project
+down. I'm not outright abandoning this project, but updates and bugfixes might be sparse going forward.
+It's time to move on to new projects.
+
 ## WARNING 2: ACTUAL BOOT TIME IMPROVEMENTS NOT GUARANTEED
 
 **If your console already instaboots with RGH1.2 (or RGH3), and has been instabooting for a long time, RGH1.3 will not
@@ -211,6 +215,9 @@ To use these patches, pass one of the following to `convert_rgh13.py`:
   with this patch.
 - `--veryfast5050` is a bit more risky, but you can still run games and the dash with no complaints, and it is super
   fast.
+
+**Big warning:** These are known to cause instability and crashes on some consoles. If your console isn't
+cooperating with these patches, leave 'em off.
 
 ## Running older kernels
 
