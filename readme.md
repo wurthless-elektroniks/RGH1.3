@@ -60,7 +60,10 @@ Disadvantages:
 
 ## Wiring everything up
 
-This depends on your board and method:
+This depends on your board and method.
+
+If you are converting from a __working__ RGH1.2 install, use zero-wire POST. Otherwise, try a one-wire or two-wire install,
+see how your system behaves, and choose whatever method works best for you.
 
 ### Two-wire POST methods
 
@@ -70,27 +73,24 @@ via the POST pins, and as such they require two POST diodes and occasionally som
 - [EXT+3 for Xenon/Elpis, 2-wire method](install_ext3_xenon.md)
 - [EXT+3 for Zephyr, chkstop method](install_ext3_zephyr_chkstop.md)
 - [RGH1.3 for Falcon/Jasper, chkstop method](install_rgh13_zfj_chkstop.md) (optimal balance between jank and functional)
-- [RGH1.3 for Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (**not recommended for new installs**)
-- [RGH1.3 for Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (**not recommended for new installs**)
+- [RGH1.3 for Falcon/Jasper, extpwr method](install_rgh13_zfj_extpwr.md) (**deprecated for new installs**)
+- [RGH1.3 for Falcon/Jasper, tiltswitch method](install_rgh13_zfj_tiltsw.md) (**deprecated for new installs**)
 
-**IMPORTANT:** If you are using two-wire installs on Zephyr, Falcon or Jasper, it is STRONGLY recommended to use the
-chkstop method for new installs, and to convert old installs to chkstop where possible. The other ones are still
-supported only for people who installed them and are too lazy to convert their systems to the newer methods (i.e., me).
-If the community decides to adopt RGH1.3 and integrate it into other tools, there is a chance that the extpwr and
-tiltswitch methods will not be widely supported.
+**IMPORTANT!** The extpwr and tiltswitch methods are deprecated for new installs. They are supported only for people
+who are too lazy to convert their systems to chkstop or the one/zero-wire methods. Support for these may not be present
+in other tools (e.g., J-Runner) if RGH1.3 ever gets widely adopted!
 
 ### Zero-wire POST method
 
 The zero-wire POST method was created for people who are converting their consoles from RGH1.2 or EXT_CLK but don't want
 to bust out the soldering iron to add more wires (although you probably should anyway in case of a bad flash). It relies
-entirely on CPU to SMC communication to track boot progress, so it is a bit slower than the two-wire or one-wire POST methods. 
+entirely on CPU to SMC communication to track boot progress, so it is a bit slower than the two-wire or one-wire POST methods.
 
 Wiring is exactly the same as RGH1.2 and EXT_CLK so it will not be repeated here.
 
-**It is STRONGLY RECOMMENDED that you DO NOT immediately use the zero-wire POST method for fresh installs on Jaspers.** Jaspers
-are subject to issues when reset glitched (see badjasper information below), and installing the bodge capacitor improperly will
-cause major CPU problems that the zero-wire method cannot detect. So start with a two-wire or one-wire install, test your system,
-fix any issues, and then convert to zero-wire.
+**Do NOT use the zero-wire POST method immediately on a new install!!** Jaspers are subject to issues when reset glitched
+(see badjasper information below), and installing the bodge capacitor improperly will cause major CPU problems that the zero-wire
+method cannot detect. So start with a two-wire or one-wire install, test your system, fix any issues, and then convert to zero-wire.
 
 ### One-wire POST method
 
