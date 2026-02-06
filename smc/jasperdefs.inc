@@ -32,6 +32,7 @@ g_rrod_base_error_pattern equ 05Dh
 g_power_up_cause                        equ 063h
 
 g_shared_timer_cell                     equ 03Dh
+g_boot_attempts                         equ 03Fh
 
 g_rol_ledstate                          equ 0AFh
 g_rol_af_cell                           equ 0B0h

@@ -24,6 +24,8 @@ g_force_rrod_power                      equ 023h.2
 g_force_rrod_overheat                   equ 023h.3
 g_force_rrod_ipc                        equ 023h.4
 
+g_boot_attempts                         equ 03Eh
+
 g_rol_ledstate                          equ 0D6h
 g_rol_af_cell                           equ 0D7h
 g_rol_flags                             equ 060h
