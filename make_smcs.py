@@ -6,6 +6,16 @@ import struct
 import platform
 import os
 import subprocess
+from enum import Enum
+
+# DO NOT CHANGE THIS ENUM IF YOU DON'T KNOW WHAT YOU'RE DOING!
+# OTHER TOOLS CAN AND WILL RELY ON THESE VALUES!
+class Rgh13BuildType(Enum):
+    ZERO_WIRE        = 0
+    ONE_WIRE         = 1
+    TWO_WIRE_CHKSTOP = 2 # also 2-wire on xenon
+    EXTPWR           = 3
+    TILTSW           = 4
 
 def find_c51asm() -> str | None:
     if platform.system() == "Darwin": # =macos
@@ -15,6 +25,51 @@ def find_c51asm() -> str | None:
         return os.path.join("bin", "c51asm.exe")
 
     raise RuntimeError("your platform isn't supported yet (sorry, linux havers)")
+
+def apply_watermark(smc: bytes, build_type: Rgh13BuildType, is_badjasper: int):
+    '''
+    Apply a watermark to the SMC image so that it can be easily identified by other tools,
+    and so that people don't have to open up their console to identify their install type.
+
+    The watermark is dropped at 0x2FE8-0x2FEF inclusive.
+
+    0x2FE8 = always 0x13 (magic)
+    0x2FE9 = build type
+             0 = 0-wire POST
+             1 = 1-wire POST
+             2 = 2-wire POST / chkstop
+             3 = extpwr (legacy, deprecated for new installs)
+             4 = tiltsw (legacy, deprecated for new installs)
+    0x2FEA = badjasper (1 if true, 0 if false)
+    0x2FEB = reserved, leave zero
+    0x2FEC = reserved, leave zero
+    0x2FED = reserved, leave zero
+    0x2FEE = always 0x31 (magic)
+    0x2FEF = checksum of all bytes (sum 0x2FE8 through 0x2FEE and AND with 0xFF)
+
+    This is a feature that should have been included a lot sooner. Sorry, everyone.
+    We all fuck up sometimes. The key to learning is to fuck up less and less.
+    '''
+
+    if smc[0x2FE8:0x2FF0] != bytes([0]*8):
+        raise RuntimeError("apply_watermark failed: magic space is occupied")
+
+    smcout = bytearray(smc)
+
+    smcout[0x2FE8] = 0x13
+    smcout[0x2FE9] = build_type.value
+    smcout[0x2FEA] = is_badjasper
+    # 2FEB, 2FEC, 2FED all reserved
+    smcout[0x2FEE] = 0x31
+
+    checksum = 0
+    for i in range(0x2FE8,0x2FEF):
+        checksum += smcout[i]
+
+    smcout[0x2FEF] = checksum & 0xFF
+
+    return smcout
+
 
 def apply_overlay(clean_smc: bytes, smc_overlay: bytes) -> bytes | None:
     # check for 0x90 as first byte in overlay
@@ -60,6 +115,8 @@ def make_patched_smc(c51asm_path:    str,
                      asm_path:       str,
                      overlay_path:   str,
                      output_path:    str,
+                     meta_build_type: Rgh13BuildType,
+                     meta_is_badjasper: int,
                      additional_args: list | None):
     
 
@@ -86,6 +143,8 @@ def make_patched_smc(c51asm_path:    str,
     clean_smc   = load_or_die(clean_smc_path)
     smc_overlay = load_or_die(overlay_path)
     patched_smc = apply_overlay(clean_smc, smc_overlay)
+    patched_smc = apply_watermark(patched_smc, meta_build_type, meta_is_badjasper)
+
 
     with open(output_path, "wb") as f:
         f.write(patched_smc)
@@ -127,6 +186,14 @@ def _permutate_jasper_targets(gpio_name: str, base_args: list):
         }
     }
 
+    iomapping_to_buildtype = {
+        '0wire': Rgh13BuildType.ZERO_WIRE,
+        '1wire': Rgh13BuildType.ONE_WIRE,
+        'chkstop': Rgh13BuildType.TWO_WIRE_CHKSTOP,
+        'extpwr': Rgh13BuildType.EXTPWR,
+        'tiltsw': Rgh13BuildType.TILTSW
+    }
+
     asm_name = "rgh13_jasper.s" if gpio_name not in [ '0wire', '1wire' ] else f"rgh13_{gpio_name}_jasper.s"
     targets = {}
     for target_name,target_params in target_templates.items():
@@ -141,6 +208,9 @@ def _permutate_jasper_targets(gpio_name: str, base_args: list):
             "additional_args": target_params["additional_args"] + base_args
         }
 
+        targets[f"{target_name}_{gpio_name}"]["meta_build_type"]   = iomapping_to_buildtype[gpio_name]
+        targets[f"{target_name}_{gpio_name}"]["meta_is_badjasper"] = 1 if 'badjasper' in output_name else 0
+
     return targets
 
 
@@ -149,21 +219,27 @@ SMC_TARGETS = {
         "clean_smc_name": "xenon_clean.bin",
         "asm_name": "rgh13_xenon.s",
         "overlay_name": "rgh13_xenon_overlay.bin",
-        "output": "rgh13_xenon.bin"
+        "output": "rgh13_xenon.bin",
+        "meta_build_type": Rgh13BuildType.TWO_WIRE_CHKSTOP,
+        "meta_is_badjasper": 0
     },
 
     "xenon_1wire": {
         "clean_smc_name": "xenon_clean.bin",
         "asm_name": "rgh13_1wire_xenon.s",
         "overlay_name": "rgh13_xenon_1wire_overlay.bin",
-        "output": "rgh13_xenon_1wire.bin"
+        "output": "rgh13_xenon_1wire.bin",
+        "meta_build_type": Rgh13BuildType.ONE_WIRE,
+        "meta_is_badjasper": 0
     },
 
     "xenon_0wire": {
         "clean_smc_name": "xenon_clean.bin",
         "asm_name": "rgh13_0wire_xenon.s",
         "overlay_name": "rgh13_xenon_0wire_overlay.bin",
-        "output": "rgh13_xenon_0wire.bin"
+        "output": "rgh13_xenon_0wire.bin",
+        "meta_build_type": Rgh13BuildType.ZERO_WIRE,
+        "meta_is_badjasper": 0
     },
 
 }
@@ -189,19 +265,30 @@ def main():
         for target, target_params in SMC_TARGETS.items():
             print(f"building target: {target}")
 
-            clean_smc_path = target_params["clean_smc_name"]
-            asm_path       = target_params["asm_name"]
-            overlay_path   = os.path.join("build", target_params["overlay_name"])
-            output_path    = os.path.join("build", target_params["output"])
+            clean_smc_path    = target_params["clean_smc_name"]
+            asm_path          = target_params["asm_name"]
+            overlay_path      = os.path.join("build", target_params["overlay_name"])
+            output_path       = os.path.join("build", target_params["output"])
+            meta_build_type   = target_params["meta_build_type"]
+            meta_is_badjasper = target_params["meta_is_badjasper"]
 
             print(f"\tclean_smc_path = {clean_smc_path}")
             print(f"\tasm_path = {asm_path}")
             print(f"\toverlay_path = {overlay_path}")
             print(f"\toutput_path = {output_path}")
+            print(f"\tmeta_build_type = {meta_build_type}")
+            print(f"\tmeta_is_badjasper = {meta_is_badjasper}")
             
             additional_args = target_params["additional_args"] if "additional_args" in target_params else None
 
-            make_patched_smc(c51asm_path, clean_smc_path, asm_path, overlay_path, output_path, additional_args)
+            make_patched_smc(c51asm_path,
+                             clean_smc_path,
+                             asm_path,
+                             overlay_path,
+                             output_path,
+                             meta_build_type,
+                             meta_is_badjasper,
+                             additional_args=additional_args)
 
     finally:
         pass
