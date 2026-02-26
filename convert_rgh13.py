@@ -224,6 +224,10 @@ def _extract_loaders(nand_stripped: bytes) -> dict:
             return result
         else:
             print(f"unrecognized loader type encountered: 0x{loader_type_raw:02x}")
+
+            # this return is here to prevent an infinite loop
+            return result
+        
         pos += loader_size
 
 # for SMC checksum/HMAC recalc

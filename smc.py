@@ -1,5 +1,34 @@
 import struct
 
+def smc_ident(smc_plaintext: bytes) -> dict:
+    SMC_TARGET_CONSOLES = {
+        0x01: "xenon",
+        0x02: "zephyr",
+        0x03: "falcon",
+        0x04: "jasper",
+        0x05: "trinity",
+        0x06: "corona",
+        0x07: "winchester"
+    }
+
+    # copyright text string has to match or else the image is bad
+    if smc_plaintext[0x10C:0x11C] != b"Copyright 2001-2":
+        return None
+
+    target_console_and_revision = smc_plaintext[0x100]
+    program_major_version       = smc_plaintext[0x101]
+    program_minor_version       = smc_plaintext[0x102]
+    
+    target_console = (target_console_and_revision >> 4) & 0xF
+    return {
+        "type":      SMC_TARGET_CONSOLES[target_console] if target_console in SMC_TARGET_CONSOLES else f"invalid ({target_console})",
+        "revision":  target_console_and_revision & 0xF,
+        "version":   f"{program_major_version}.{program_minor_version:02d}"
+    }
+
+def smc_ident_encrypted(smc_encrypted: bytes) -> dict:
+    return smc_ident(decrypt_smc(smc_encrypted))
+
 def encrypt_smc(data: bytes,
                 skip_swap_firstfour: bool = False) -> bytes:
 
