@@ -49,6 +49,8 @@ In short, RGH1.3 does the following:
 Benefits over RGH1.2:
 - Instant reboots if things go wrong
 - More aggressive approaches for stubborn systems (hi Jasper owners)
+- Glitch attempts are about half a second faster
+- Use of an intermediate loader means we can use any CB_B bootloader without needing multiple timing files
 
 Benefits over RGH3:
 - More precise glitching since we're using a glitch chip
@@ -62,8 +64,12 @@ Disadvantages:
 
 This depends on your board and method.
 
-If you are converting from a __working__ RGH1.2 install, use zero-wire POST. Otherwise, try a one-wire or two-wire install,
-see how your system behaves, and choose whatever method works best for you.
+- For Zephyr, Falcon and Jasper: If you are converting from a __working__ RGH1.2 or EXT_CLK install, use zero-wire POST.
+  Otherwise, try a one-wire or two-wire install, see how your system behaves, and choose whatever
+  method works best for you. Falcons are much more cooperative than Jaspers, so you might be able to get
+  away with a zero-wire install from the get-go. Your milage may vary.
+
+- For Xenon, start with zero-wire POST, as it's reliable enough and a cleaner install.
 
 ### Two-wire POST methods
 
@@ -165,12 +171,10 @@ These blink codes will help with tuning the glitch chip timings too. If the CPU 
 CB_A, the timing is way off or the pulse width is too large. You want it so that CB_B consistently
 starts and runs HWINIT.
 
-Also there's error handling. If something goes wrong at boot, the system will raise a Red Ring of Death
-and shut down. Press Eject and Sync as usual to get the error codes. The RGH1.3 error codes are:
-
-- 3333: POST bits 6 and 7 were not low coming out of CPU reset. Diodes are missing or wired incorrectly.
-  Also check that you've disabled the tilt switch. **If you are using the capacitor and you get this error
-  code, there is too much noise on the PLL wire.**
+If your system is constantly rebooting under the two-wire and one-wire POST methods or you get
+RRoD error 3333, then POST bits 6 and 7 were not low coming out of CPU reset. Diodes are missing
+or wired incorrectly. Also check that you've disabled the tilt switch.
+**If you are using the bodge capacitor and this error state happens, there is too much noise on the PLL wire.**
 
 ## Creating your updflash.bin
 

@@ -18,10 +18,10 @@ The glitch chip wiring is the same as EXT_CLK, but here it is again in case you'
 - C = STBY_CLK
 - F = CPU_EXT_CLK_EN
 
-You will also need two resistors (10k-22k; 10k works better) and two 1N400x diodes, which are soldered to
+You will also need two resistors (10k-22k; **10k works better**) and two 1N400x diodes, which are soldered to
 the debug LED port similar to how JTAG does it. The resistors are used as pullups; without them, the SMC
 code won't be able to detect POST state changes. **If you try to run the SMC code without the pullups, you'll get a
-RRoD.**
+RRoD, or the console will bootloop.**
 
 **If you are using the one-wire method, it is only necessary to connect DBG_LED2 to POST bit 7.** 
 
