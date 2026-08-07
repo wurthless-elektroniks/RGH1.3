@@ -104,6 +104,11 @@ def _init_argparser():
                            default=False,
                            action='store_true',
                            help="Use zero-wire POST method")
+
+    argparser.add_argument("--force-xsb-r0",
+                           default=False,
+                           action='store_true',
+                           help='Xenon systems only: patch SMC for systems have a XSB R0 southbridge')
     
     argparser.add_argument("--smcnoeject",
                            default=False,
@@ -516,6 +521,13 @@ def main():
         smcdata = bytearray(smcdata)
         smcdata = smcdata.replace(bytes([0xE4, 0xA2, 0xCF, 0x92, 0xE0, 0xA2, 0xCE, 0x22]),
                                   bytes([0xE4, 0xD3, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00])
+                                  )
+
+    if args.force_xsb_r0:
+        print("force XSB R0...")
+        smcdata = bytearray(smcdata)
+        smcdata = smcdata.replace(bytes([0x75, 0xFC, 0xC2]),
+                                  bytes([0x75, 0xFC, 0x43])
                                   )
 
     # inject appropriate SMC image
