@@ -48,6 +48,9 @@ def ecc_calc(sector: bytes, special_data: int = 0) -> bytes:
 
     return struct.pack("<L", val)
 
+def ecc_num_sectors_per_block(nand_type: NandType):
+    return 256 if nand_type == NandType.NAND_64M else 32
+
 def ecc_encode(bin_image: bytes,
                nand_type: NandType,
                starting_block: int = 0) -> bytes:
@@ -57,7 +60,7 @@ def ecc_encode(bin_image: bytes,
 
     block_id                   = starting_block
     sectors_written_this_block = 0
-    num_sectors_per_block      = 256 if nand_type == NandType.NAND_64M else 32
+    num_sectors_per_block      = ecc_num_sectors_per_block(nand_type)
 
     result = bytearray()
 

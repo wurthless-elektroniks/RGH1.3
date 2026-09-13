@@ -2,6 +2,7 @@ import sys
 import struct
 import hashlib
 import hmac
+import math
 import re
 from argparse import ArgumentParser,RawTextHelpFormatter
 from enum import Enum
@@ -392,7 +393,7 @@ def main():
     if nand_stripped[0x070000:0x070000+len(xell_signature)] == xell_signature:
         xell_pos = 0x070000
     elif nand_stripped[0x73800:0x73800+len(xell_signature)] == xell_signature:
-        xell_pos = 0x73800
+        xell_pos = 0x073800
 
     if xell_pos is None:
         print("error: cannot find XeLL - might not be a valid glitch2/glitch3 image")
@@ -403,6 +404,31 @@ def main():
     
     loaders = _extract_loaders(nand_stripped)
 
+    # truncate the bits we're about to write to the bootloader chain *ONLY*
+    headersection_total_size = 0x8000
+    for loader in loaders.values():
+        headersection_total_size += len(loader)
+
+    num_sectors_per_block = ecc.ecc_num_sectors_per_block(nand_type)
+    blocks_to_keep = math.ceil(headersection_total_size / 0x200 / num_sectors_per_block)
+    print(f"our patch operation will affect blocks 0000 thru {blocks_to_keep:04x} (0x00000000-0x{headersection_total_size:08x})")
+
+    block_keep_length = blocks_to_keep * 0x200 * num_sectors_per_block
+
+    # cheap hack: if re-encoded to ECC, does the data match?
+    print("verifying ECC within the bootloader area...")
+    bootblocks_ecc_before   = nand[0:blocks_to_keep * 0x210 * num_sectors_per_block]
+    bootblocks_ecc_recalced = ecc.ecc_encode(nand_stripped[:block_keep_length], nand_type)
+
+    if bootblocks_ecc_before != bootblocks_ecc_recalced:
+        print("error: ECC mismatch in boot blocks. you likely have a bad block there.")
+        return
+
+    print("bootloader area is good, continuing on.")
+
+    # truncate output now that we no longer need XeLL
+    nand_stripped = nand_stripped[:block_keep_length]
+ 
     imagetype = None
     if 'cbx' in loaders:
         print("found glitch3/RGH3 image")
